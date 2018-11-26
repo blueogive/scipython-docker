@@ -15,31 +15,31 @@ FROM ubuntu:bionic-20180821
 USER root
 
 RUN apt-get update --fix-missing && \
-	apt-get install -y --no-install-recommends \
-		wget \
-		bzip2 \
-		ca-certificates \
-		curl \
-		git \
-		locales \
-		curl && \
-	apt-get clean && \
-	rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+        wget \
+        bzip2 \
+        ca-certificates \
+        curl \
+        git \
+        locales \
+        curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
 ENV LC_ALL="en_US.UTF-8" \
-	LANG="en_US.UTF-8" \
-	LANGUAGE="en_US.UTF-8" \
-	PATH=/opt/conda/bin:$PATH \
-	SHELL=/bin/bash \
-	CT_USER=docker \
-	CT_UID=1000 \
-	CT_GID=100 \
-	TINI_VERSION=v0.16.1
+    LANG="en_US.UTF-8" \
+    LANGUAGE="en_US.UTF-8" \
+    PATH=/opt/conda/bin:$PATH \
+    SHELL=/bin/bash \
+    CT_USER=docker \
+    CT_UID=1000 \
+    CT_GID=100 \
+    TINI_VERSION=v0.16.1
 
 ## Setup the locale
 RUN /usr/sbin/locale-gen ${LC_ALL} \
-	&& /usr/sbin/update-locale LANG=${LANG}
+    && /usr/sbin/update-locale LANG=${LANG}
 
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O /root/miniconda.sh && \
     /bin/bash /root/miniconda.sh -b -p /opt/conda && \
@@ -52,27 +52,27 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 ## Set a default user. Available via runtime flag `--user docker`
 ## User should also have & own a home directory (e.g. for linked volumes to work properly).
 RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_USER} \
-	&& chmod +x /usr/bin/tini
+    && chmod +x /usr/bin/tini
 
 WORKDIR /root
 COPY conda-env.yml conda-env.yml
-RUN /opt/conda/bin/conda config --add channels conda-forge
-RUN /opt/conda/bin/conda env update -n base --file conda-env.yml
-RUN /opt/conda/bin/conda clean -tipsy
-RUN rm conda-env.yml
+RUN /opt/conda/bin/conda config --add channels conda-forge \
+    && /opt/conda/bin/conda env update -n base --file conda-env.yml \
+    && /opt/conda/bin/conda clean -tipsy \
+    && rm conda-env.yml
 
 ENV HOME=/home/${CT_USER}
 WORKDIR ${HOME}
 USER ${CT_USER}
 RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
-	mkdir ${HOME}/work
+    mkdir ${HOME}/work
 SHELL [ "/bin/bash", "--login", "-c"]
 RUN source ${HOME}/.bashrc \
-	&& conda activate base \
-	&& git clone https://github.com/blueogive/pyncrypt.git \
-	&& pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
-	&& rm -rf pyncrypt
+    && conda activate base \
+    && git clone https://github.com/blueogive/pyncrypt.git \
+    && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
+    && rm -rf pyncrypt
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
@@ -81,12 +81,12 @@ ARG BUILD_DATE=${BUILD_DATE}
 # Add image metadata
 LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
     org.label-schema.vendor="Anaconda, Inc. and Python Foundation, Dockerfile provided by Mark Coggeshall" \
-	org.label-schema.name="Scientific Python Foundation" \
-	org.label-schema.description="Docker image including a foundational scientific Python stack based on Miniconda and Python 3." \
-	org.label-schema.vcs-url=${VCS_URL} \
-	org.label-schema.vcs-ref=${VCS_REF} \
-	org.label-schema.build-date=${BUILD_DATE} \
-	maintainer="Mark Coggeshall <mark.coggeshall@gmail.com>"
+    org.label-schema.name="Scientific Python Foundation" \
+    org.label-schema.description="Docker image including a foundational scientific Python stack based on Miniconda and Python 3." \
+    org.label-schema.vcs-url=${VCS_URL} \
+    org.label-schema.vcs-ref=${VCS_REF} \
+    org.label-schema.build-date=${BUILD_DATE} \
+    maintainer="Mark Coggeshall <mark.coggeshall@gmail.com>"
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
