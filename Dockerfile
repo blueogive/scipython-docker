@@ -27,49 +27,52 @@ RUN apt-get update --fix-missing && \
 	rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
-ENV LC_ALL=en_US.UTF-8 \
-	LANG=en_US.UTF-8 \
-	LANGUAGE=en_US.UTF-8 \
+ENV LC_ALL="en_US.UTF-8" \
+	LANG="en_US.UTF-8" \
+	LANGUAGE="en_US.UTF-8" \
 	PATH=/opt/conda/bin:$PATH \
 	SHELL=/bin/bash \
 	CT_USER=docker \
 	CT_UID=1000 \
 	CT_GID=100 \
 	TINI_VERSION=v0.16.1
-ENV HOME=/home/${CT_USER}
 
 ## Setup the locale
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-	&& locale-gen ${LC_ALL} \
+RUN /usr/sbin/locale-gen ${LC_ALL} \
 	&& /usr/sbin/update-locale LANG=${LANG}
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O /root/miniconda.sh && \
+    /bin/bash /root/miniconda.sh -b -p /opt/conda && \
+    rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 ## Set a default user. Available via runtime flag `--user docker`
 ## User should also have & own a home directory (e.g. for linked volumes to work properly).
-RUN useradd ${CT_USER} \
-	&& mkdir ${HOME} \
-	&& chown ${CT_USER}:${CT_USER} ${HOME} \
-	&& addgroup ${CT_USER} staff \
+RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_USER} \
 	&& chmod +x /usr/bin/tini
 
+WORKDIR /root
+COPY conda-env.yml conda-env.yml
+RUN /opt/conda/bin/conda config --add channels conda-forge
+RUN /opt/conda/bin/conda env update -n base --file conda-env.yml
+RUN /opt/conda/bin/conda clean -tipsy
+RUN rm conda-env.yml
+
+ENV HOME=/home/${CT_USER}
 WORKDIR ${HOME}
 USER ${CT_USER}
 RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
 	mkdir ${HOME}/work
-
-COPY requirements.txt requirements.txt
-RUN /opt/conda/bin/conda install --file requirements.txt
-RUN /opt/conda/bin/conda clean -tipsy
-RUN pip install --no-cache-dir -r requirements.txt
-RUN rm requirements.txt
+SHELL [ "/bin/bash", "--login", "-c"]
+RUN source ${HOME}/.bashrc \
+	&& conda activate base \
+	&& git clone https://github.com/blueogive/pyncrypt.git \
+	&& pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
+	&& rm -rf pyncrypt
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
