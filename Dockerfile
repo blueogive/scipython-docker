@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20180821
+FROM ubuntu:bionic-20190204
 
 USER root
 
@@ -20,8 +20,10 @@ RUN apt-get update --fix-missing && \
         bzip2 \
         ca-certificates \
         curl \
+        gosu \
         git \
         locales \
+        make \
         curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -41,7 +43,7 @@ ENV LC_ALL="en_US.UTF-8" \
 RUN /usr/sbin/locale-gen ${LC_ALL} \
     && /usr/sbin/update-locale LANG=${LANG}
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O /root/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh -O /root/miniconda.sh && \
     /bin/bash /root/miniconda.sh -b -p /opt/conda && \
     rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
@@ -73,6 +75,7 @@ RUN source ${HOME}/.bashrc \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt
+WORKDIR ${HOME}/work
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
