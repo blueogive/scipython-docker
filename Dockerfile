@@ -91,5 +91,7 @@ LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
     org.label-schema.build-date=${BUILD_DATE} \
     maintainer="Mark Coggeshall <mark.coggeshall@gmail.com>"
 
+USER root
+
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
