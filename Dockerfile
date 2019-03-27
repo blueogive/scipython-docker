@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20190204
+FROM ubuntu:bionic-20190307
 
 USER root
 
@@ -20,19 +20,31 @@ RUN apt-get update --fix-missing && \
         bzip2 \
         ca-certificates \
         curl \
+        gnupg2 \
         gosu \
         git \
         locales \
-        make \
-        curl && \
+        make && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+## Install Microsoft ODBC driver and SQL commandline tools
+RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
+    && apt-key add microsoft.asc \
+    && rm microsoft.asc \
+    && curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
+        msodbcsql17 \
+        mssql-tools \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
 ENV LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
-    PATH=/opt/conda/bin:$PATH \
+    PATH=/opt/conda/bin:/opt/mssql-tools/bin:${PATH} \
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
@@ -74,7 +86,9 @@ RUN source ${HOME}/.bashrc \
     && conda activate base \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
-    && rm -rf pyncrypt
+    && rm -rf pyncrypt \
+    && mkdir -p .config/pip
+COPY pip.conf .config/pip/pip.conf
 WORKDIR ${HOME}/work
 
 ARG VCS_URL=${VCS_URL}

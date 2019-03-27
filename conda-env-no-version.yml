@@ -59,6 +59,7 @@ dependencies:
   - ipywidgets
   - isort
   - jedi
+  - jellyfish
   - jinja2
   - jpeg
   - jsonschema
