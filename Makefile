@@ -1,16 +1,12 @@
-.PHONY : docker-clean docker-prune docker-check docker-build
+.PHONY : docker-prune docker-check docker-build
 
 VCS_URL := $(shell git remote get-url --push gh)
 VCS_REF := $(shell git rev-parse --short HEAD)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-docker-clean :
-	@echo Removing dangling/untagged images
-	docker images -q --filter dangling=true | xargs docker rmi --force
-
 docker-prune :
-	@echo Pruning Docker images/containers not in use
-	docker system prune -a
+	@echo Pruning Docker images/containers/networks not in use
+	docker system prune
 
 docker-check :
 	@echo Computing reclaimable space consumed by Docker artifacts
