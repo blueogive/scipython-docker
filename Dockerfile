@@ -19,6 +19,7 @@ RUN apt-get update --fix-missing && \
         wget \
         bzip2 \
         ca-certificates \
+        libssl1.0-dev \
         curl \
         gnupg2 \
         gosu \
