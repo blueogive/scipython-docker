@@ -1,4 +1,4 @@
-.PHONY : docker-prune docker-check docker-build
+.PHONY : docker-prune docker-check docker-build docker-push
 
 VCS_URL := $(shell git remote get-url --push gh)
 VCS_REF := $(shell git rev-parse --short HEAD)
@@ -20,3 +20,7 @@ docker-build: Dockerfile
 	--build-arg BUILD_DATE=$(BUILD_DATE) \
 	--tag blueogive/scipython-docker:$(TAG_DATE) \
 	--tag blueogive/scipython-docker:latest .
+
+docker-push : docker-build
+	@docker push blueogive/scipython-docker:$(TAG_DATE)
+	@docker push blueogive/scipython-docker:latest
