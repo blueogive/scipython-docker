@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20190307
+FROM ubuntu:bionic-20190515
 
 USER root
 
@@ -57,9 +57,9 @@ RUN /usr/sbin/locale-gen ${LC_ALL} \
     && /usr/sbin/update-locale LANG=${LANG}
 
 RUN wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh \
     -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "866ae9dff53ad0874e1d1a60b1ad1ef8" ]; then \
+    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "718259965f234088d785cad1fbd7de03" ]; then \
         /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
     rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \

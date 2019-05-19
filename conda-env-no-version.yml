@@ -8,16 +8,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - argh
-  - jupyter_contrib_core
-  - jupyter_contrib_nbextensions
-  - jupyter_highlight_selected_word
-  - jupyter_latex_envs
-  - jupyter_nbextensions_configurator
-  - pathtools
-  - python-dotenv
-  - watchdog
   - alabaster
+  - argh
   - asn1crypto
   - astroid
   - atomicwrites
@@ -26,6 +18,7 @@ dependencies:
   - backcall
   - blas
   - bleach
+  - bzip2
   - ca-certificates
   - certifi
   - cffi
@@ -39,12 +32,14 @@ dependencies:
   - cython
   - dbus
   - decorator
+  - defusedxml
   - docutils
   - entrypoints
   - expat
   - flake8
   - fontconfig
   - freetype
+  - gettext
   - glib
   - gmp
   - gst-plugins-base
@@ -61,19 +56,30 @@ dependencies:
   - jedi
   - jellyfish
   - jinja2
+  - joblib
   - jpeg
   - jsonschema
   - jupyter
   - jupyter_client
   - jupyter_console
+  - jupyter_contrib_core
+  - jupyter_contrib_nbextensions
   - jupyter_core
+  - jupyter_highlight_selected_word
+  - jupyter_latex_envs
+  - jupyter_nbextensions_configurator
   - kiwisolver
   - krb5
   - lazy-object-proxy
+  - libblas
+  - libcblas
   - libedit
   - libffi
   - libgcc-ng
   - libgfortran-ng
+  - libiconv
+  - liblapack
+  - libopenblas
   - libpng
   - libpq
   - libsodium
@@ -85,6 +91,7 @@ dependencies:
   - lxml
   - markupsafe
   - matplotlib
+  - matplotlib-base
   - mccabe
   - mistune
   - mkl
@@ -97,6 +104,7 @@ dependencies:
   - notebook
   - numpy
   - numpy-base
+  - openblas
   - openssl
   - packaging
   - pandas
@@ -104,6 +112,7 @@ dependencies:
   - pandocfilters
   - parso
   - pathlib2
+  - pathtools
   - patsy
   - pbkdf2
   - pcre
@@ -115,6 +124,7 @@ dependencies:
   - prometheus_client
   - prompt_toolkit
   - psycopg2
+  - pthread-stubs
   - ptyprocess
   - py
   - pycodestyle
@@ -130,10 +140,12 @@ dependencies:
   - pyparsing
   - pyproj
   - pyqt
+  - pyrsistent
   - pysocks
   - pytest
-  - python=3.7.2
+  - python=3.7.3
   - python-dateutil
+  - python-dotenv
   - pytz
   - pyyaml
   - pyzmq
@@ -152,6 +164,12 @@ dependencies:
   - snowballstemmer
   - sphinx
   - sphinxcontrib
+  - sphinxcontrib-applehelp
+  - sphinxcontrib-devhelp
+  - sphinxcontrib-htmlhelp
+  - sphinxcontrib-jsmath
+  - sphinxcontrib-qthelp
+  - sphinxcontrib-serializinghtml
   - sphinxcontrib-websupport
   - sqlalchemy
   - sqlite
@@ -163,11 +181,14 @@ dependencies:
   - traitlets
   - unixodbc
   - urllib3
+  - watchdog
   - wcwidth
   - webencodings
   - wheel
   - widgetsnbextension
   - wrapt
+  - xorg-libxau
+  - xorg-libxdmcp
   - xz
   - yaml
   - zeromq
