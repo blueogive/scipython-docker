@@ -73,11 +73,12 @@ RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_
     && chmod +x /usr/bin/tini
 
 WORKDIR /root
-COPY conda-env.yml conda-env.yml
+ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
+COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
 RUN /opt/conda/bin/conda config --add channels conda-forge \
-    && /opt/conda/bin/conda env update -n base --file conda-env.yml \
+    && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda clean -tipsy \
-    && rm conda-env.yml
+    && rm ${CONDA_ENV_FILE}
 
 ENV HOME=/home/${CT_USER}
 WORKDIR ${HOME}
