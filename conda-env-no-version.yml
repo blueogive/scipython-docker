@@ -9,23 +9,28 @@ channels:
   - defaults
 dependencies:
   - alabaster
+  - alembic
   - argh
   - asn1crypto
   - astroid
+  - async_generator
   - atomicwrites
   - attrs
   - babel
   - backcall
   - blas
   - bleach
+  - blinker
   - bzip2
   - ca-certificates
   - certifi
+  - certipy
   - cffi
   - chardet
   - click
   - conda
   - conda-env
+  - configurable-http-proxy
   - coverage
   - cryptography
   - cycler
@@ -68,11 +73,15 @@ dependencies:
   - jupyter_highlight_selected_word
   - jupyter_latex_envs
   - jupyter_nbextensions_configurator
+  - jupyterhub
+  - jupyterlab
+  - jupyterlab_server
   - kiwisolver
   - krb5
   - lazy-object-proxy
   - libblas
   - libcblas
+  - libcurl
   - libedit
   - libffi
   - libgcc-ng
@@ -83,12 +92,14 @@ dependencies:
   - libpng
   - libpq
   - libsodium
+  - libssh2
   - libstdcxx-ng
   - libuuid
   - libxcb
   - libxml2
   - libxslt
   - lxml
+  - mako
   - markupsafe
   - matplotlib
   - matplotlib-base
@@ -101,12 +112,15 @@ dependencies:
   - nbconvert
   - nbformat
   - ncurses
+  - nodejs
   - notebook
   - numpy
   - numpy-base
+  - oauthlib
   - openblas
   - openssl
   - packaging
+  - pamela
   - pandas
   - pandoc
   - pandocfilters
@@ -131,9 +145,11 @@ dependencies:
   - pycosat
   - pycparser
   - pycrypto
+  - pycurl
   - pydocstyle
   - pyflakes
   - pygments
+  - pyjwt
   - pylint
   - pyodbc
   - pyopenssl
@@ -143,9 +159,10 @@ dependencies:
   - pyrsistent
   - pysocks
   - pytest
-  - python=3.7.3
+  - python
   - python-dateutil
   - python-dotenv
+  - python-editor
   - pytz
   - pyyaml
   - pyzmq
@@ -176,6 +193,7 @@ dependencies:
   - statsmodels
   - terminado
   - testpath
+  - tini
   - tk
   - tornado
   - traitlets

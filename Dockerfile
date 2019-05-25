@@ -50,7 +50,7 @@ ENV LC_ALL="en_US.UTF-8" \
     CT_USER=docker \
     CT_UID=1000 \
     CT_GID=100 \
-    TINI_VERSION=v0.16.1
+    CONDA_DIR=/opt/conda
 
 ## Setup the locale
 RUN /usr/sbin/locale-gen ${LC_ALL} \
@@ -65,24 +65,39 @@ RUN wget --quiet \
     /opt/conda/bin/conda clean -tipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+# Add a script that we will use to correct permissions after running certain commands
+ADD fix-permissions /usr/local/bin/fix-permissions
 
 ## Set a default user. Available via runtime flag `--user docker`
 ## User should also have & own a home directory (e.g. for linked volumes to work properly).
-RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_USER} \
-    && chmod +x /usr/bin/tini
+RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_USER}
 
-WORKDIR /root
+# Install Tini
+RUN conda install --quiet --yes 'tini=0.18.0' \
+    && conda list tini | grep tini | tr -s ' ' | cut -d ' ' -f 1,2 >> ${CONDA_DIR}/conda-meta/pinned \
+    && conda clean --all -f -y \
+    && fix-permissions ${CONDA_DIR} \
+    && fix-permissions /home/${CT_USER}
+
+# WORKDIR /root
+ENV HOME=/home/${CT_USER}
+WORKDIR ${HOME}
+USER ${CT_USER}
+
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
 RUN /opt/conda/bin/conda config --add channels conda-forge \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda clean -tipsy \
-    && rm ${CONDA_ENV_FILE}
+    && rm ${CONDA_ENV_FILE} \
+    && jupyter labextension install @jupyterlab/hub-extension@^0.12.0 \
+    && npm cache clean --force \
+    && jupyter notebook --generate-config \
+    && rm -rf ${CONDA_DIR}/share/jupyter/lab/staging \
+    && rm -rf /home/${CT_USER}/.cache/yarn \
+    && fix-permissions ${CONDA_DIR} \
+    && fix-permissions /home/${CT_USER}
 
-ENV HOME=/home/${CT_USER}
-WORKDIR ${HOME}
-USER ${CT_USER}
 RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
     mkdir ${HOME}/work
@@ -92,7 +107,8 @@ RUN source ${HOME}/.bashrc \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt \
-    && mkdir -p .config/pip
+    && mkdir -p .config/pip \
+    && fix-permissions ${HOME}/work
 COPY pip.conf .config/pip/pip.conf
 WORKDIR ${HOME}/work
 
@@ -112,5 +128,17 @@ LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
 
 USER root
 
-ENTRYPOINT [ "/usr/bin/tini", "--" ]
+EXPOSE 8888
+WORKDIR ${HOME}/work
+
+# Configure container startup
+ENTRYPOINT ["tini", "-g", "--"]
+
+# Add local files as late as possible to avoid cache busting
+COPY start.sh /usr/local/bin/
+COPY start-notebook.sh /usr/local/bin/
+COPY start-singleuser.sh /usr/local/bin/
+COPY jupyter_notebook_config.py /etc/jupyter/
+RUN fix-permissions /etc/jupyter/
+
 CMD [ "/bin/bash" ]
