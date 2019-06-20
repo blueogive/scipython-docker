@@ -5,24 +5,33 @@
 # Replace: - $1
 name: base
 channels:
+  - r
   - conda-forge
   - defaults
 dependencies:
+  - _r-mutex
+  - aiohttp
   - alabaster
   - alembic
   - argh
   - asn1crypto
   - astroid
+  - async-timeout
   - async_generator
+  - atk
   - atomicwrites
   - attrs
   - babel
   - backcall
+  - binutils_impl_linux-64
+  - binutils_linux-64
   - blas
   - bleach
   - blinker
+  - bwidget
   - bzip2
   - ca-certificates
+  - cairo
   - certifi
   - certipy
   - cffi
@@ -33,7 +42,9 @@ dependencies:
   - configurable-http-proxy
   - coverage
   - cryptography
+  - curl
   - cycler
+  - cyrus-sasl
   - cython
   - dbus
   - decorator
@@ -42,16 +53,35 @@ dependencies:
   - entrypoints
   - expat
   - flake8
+  - font-ttf-dejavu-sans-mono
+  - font-ttf-inconsolata
+  - font-ttf-source-code-pro
+  - font-ttf-ubuntu
   - fontconfig
+  - fonts-anaconda=1=h8fa9717_0
   - freetype
+  - gcc_impl_linux-64
+  - gcc_linux-64
+  - gdk-pixbuf
   - gettext
+  - gfortran_impl_linux-64
+  - gfortran_linux-64
   - glib
   - gmp
+  - gobject-introspection
+  - graphite2
+  - gsl
   - gst-plugins-base
   - gstreamer
+  - gtk2
+  - gxx_impl_linux-64
+  - gxx_linux-64
+  - harfbuzz
   - icu
   - idna
+  - idna_ssl
   - imagesize
+  - importlib_metadata
   - intel-openmp
   - ipykernel
   - ipython
@@ -65,6 +95,8 @@ dependencies:
   - jpeg
   - jsonschema
   - jupyter
+  - jupyter-rsession-proxy
+  - jupyter-server-proxy
   - jupyter_client
   - jupyter_console
   - jupyter_contrib_core
@@ -76,6 +108,7 @@ dependencies:
   - jupyterhub
   - jupyterlab
   - jupyterlab_server
+  - jupytext
   - kiwisolver
   - krb5
   - lazy-object-proxy
@@ -88,17 +121,21 @@ dependencies:
   - libgfortran-ng
   - libiconv
   - liblapack
+  - libntlm
   - libopenblas
   - libpng
   - libpq
   - libsodium
   - libssh2
   - libstdcxx-ng
+  - libtiff
   - libuuid
   - libxcb
   - libxml2
   - libxslt
   - lxml
+  - lz4-c
+  - make
   - mako
   - markupsafe
   - matplotlib
@@ -108,7 +145,9 @@ dependencies:
   - mkl
   - mkl_fft
   - mkl_random
+  - mock
   - more-itertools
+  - multidict
   - nbconvert
   - nbformat
   - ncurses
@@ -117,13 +156,14 @@ dependencies:
   - numpy
   - numpy-base
   - oauthlib
-  - openblas
+  - openjdk
   - openssl
   - packaging
   - pamela
   - pandas
   - pandoc
   - pandocfilters
+  - pango
   - parso
   - pathlib2
   - pathtools
@@ -133,6 +173,7 @@ dependencies:
   - pexpect
   - pickleshare
   - pip
+  - pixman
   - pluggy
   - proj4
   - prometheus_client
@@ -168,6 +209,197 @@ dependencies:
   - pyzmq
   - qt
   - qtconsole
+  - r-askpass
+  - r-assertthat
+  - r-backports
+  - r-base
+  - r-base64enc
+  - r-bh
+  - r-bibtex
+  - r-bit
+  - r-bit64
+  - r-bitops
+  - r-blob
+  - r-bookdown
+  - r-boot
+  - r-broom
+  - r-callr
+  - r-caret
+  - r-catools
+  - r-cellranger
+  - r-checkmate
+  - r-class
+  - r-cli
+  - r-clipr
+  - r-clisymbols
+  - r-cluster
+  - r-codetools
+  - r-colorspace
+  - r-config
+  - r-crayon
+  - r-curl
+  - r-data.table
+  - r-dbi
+  - r-dbplyr
+  - r-desc
+  - r-devtools
+  - r-digest
+  - r-downloader
+  - r-dplyr
+  - r-ellipsis
+  - r-essentials
+  - r-evaluate
+  - r-fansi
+  - r-forcats
+  - r-foreach
+  - r-foreign
+  - r-forge
+  - r-formatr
+  - r-fs
+  - r-generics
+  - r-ggplot2
+  - r-ggthemes
+  - r-gh
+  - r-gistr
+  - r-git2r
+  - r-glmnet
+  - r-glue
+  - r-gower
+  - r-gtable
+  - r-haven
+  - r-hexbin
+  - r-highr
+  - r-hms
+  - r-htmltable
+  - r-htmltools
+  - r-htmlwidgets
+  - r-httpuv
+  - r-httr
+  - r-ini
+  - r-ipred
+  - r-irdisplay
+  - r-irkernel
+  - r-iterators
+  - r-jsonlite
+  - r-kernsmooth
+  - r-knitcitations
+  - r-knitr
+  - r-labeling
+  - r-later
+  - r-lattice
+  - r-lava
+  - r-lazyeval
+  - r-lme4
+  - r-lubridate
+  - r-magrittr
+  - r-maps
+  - r-markdown
+  - r-mass
+  - r-matrix
+  - r-memoise
+  - r-mgcv
+  - r-mime
+  - r-miniui
+  - r-minqa
+  - r-modelmetrics
+  - r-modelr
+  - r-mongolite
+  - r-munsell
+  - r-nlme
+  - r-nloptr
+  - r-nnet
+  - r-numderiv
+  - r-odbc
+  - r-openssl
+  - r-packrat
+  - r-pbdzmq
+  - r-pillar
+  - r-pkgbuild
+  - r-pkgconfig
+  - r-pkgload
+  - r-pki
+  - r-plogr
+  - r-plyr
+  - r-png
+  - r-praise
+  - r-prettyunits
+  - r-processx
+  - r-prodlim
+  - r-profvis
+  - r-progress
+  - r-promises
+  - r-pryr
+  - r-ps
+  - r-purrr
+  - r-quantmod
+  - r-r2d3
+  - r-r6
+  - r-radix
+  - r-randomforest
+  - r-rappdirs
+  - r-rbokeh
+  - r-rcmdcheck
+  - r-rcolorbrewer
+  - r-rcpp
+  - r-rcppeigen
+  - r-rcpproll
+  - r-rcurl
+  - r-readr
+  - r-readxl
+  - r-recipes
+  - r-recommended
+  - r-refmanager
+  - r-rematch
+  - r-remotes
+  - r-repr
+  - r-reprex
+  - r-reshape2
+  - r-reticulate
+  - r-rjava
+  - r-rjdbc
+  - r-rjsonio
+  - r-rlang
+  - r-rmarkdown
+  - r-rpart
+  - r-rprojroot
+  - r-rsconnect
+  - r-rstudioapi
+  - r-rvest
+  - r-scales
+  - r-selectr
+  - r-sessioninfo
+  - r-shiny
+  - r-sourcetools
+  - r-sparklyr
+  - r-spatial
+  - r-squarem
+  - r-stringi
+  - r-stringr
+  - r-survival
+  - r-sys
+  - r-testthat
+  - r-tibble
+  - r-tidyr
+  - r-tidyselect
+  - r-tidyverse
+  - r-timedate
+  - r-tinytex
+  - r-ttr
+  - r-usethis
+  - r-utf8
+  - r-uuid
+  - r-vctrs
+  - r-viridislite
+  - r-whisker
+  - r-withr
+  - r-xfun
+  - r-xml2
+  - r-xopen
+  - r-xtable
+  - r-xts
+  - r-yaml
+  - r-zeallot
+  - r-zoo
   - readline
   - requests
   - ruamel_yaml
@@ -176,6 +408,7 @@ dependencies:
   - seaborn
   - send2trash
   - setuptools
+  - simpervisor
   - sip
   - six
   - snowballstemmer
@@ -192,11 +425,15 @@ dependencies:
   - sqlite
   - statsmodels
   - terminado
+  - testfixtures
   - testpath
   - tini
   - tk
+  - tktable
   - tornado
   - traitlets
+  - typed-ast
+  - typing_extensions
   - unixodbc
   - urllib3
   - watchdog
@@ -205,10 +442,23 @@ dependencies:
   - wheel
   - widgetsnbextension
   - wrapt
+  - xorg-kbproto
+  - xorg-libice
+  - xorg-libsm
+  - xorg-libx11
   - xorg-libxau
   - xorg-libxdmcp
+  - xorg-libxext
+  - xorg-libxrender
+  - xorg-libxt
+  - xorg-renderproto
+  - xorg-xextproto
+  - xorg-xproto
   - xz
   - yaml
+  - yarl
   - zeromq
+  - zipp
   - zlib
+  - zstd
 prefix: /opt/conda

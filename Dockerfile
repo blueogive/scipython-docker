@@ -14,20 +14,42 @@ FROM ubuntu:bionic-20190515
 
 USER root
 
-RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends \
-        wget \
+ENV RSTUDIO_VERSION=1.2.1335 \
+    PANDOC_TEMPLATES_VERSION=2.7.2
+ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"
+
+RUN apt-get update --fix-missing \
+    && apt-get install -y --no-install-recommends \
         bzip2 \
         ca-certificates \
-        libssl1.0-dev \
         curl \
+        gdebi-core \
+        git \
         gnupg2 \
         gosu \
-        git \
+        libapparmor1 \
+        libclang-dev \
+        libssl1.0-dev \
         locales \
-        make && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+        lsb-release \
+        make \
+        psmisc \
+        sudo \
+        wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+## Install pandoc-templates.
+RUN mkdir -p /opt/pandoc/templates \
+  && cd /opt/pandoc/templates \
+  && wget -q https://github.com/jgm/pandoc-templates/archive/${PANDOC_TEMPLATES_VERSION}.tar.gz \
+  && tar xzf ${PANDOC_TEMPLATES_VERSION}.tar.gz \
+  && rm ${PANDOC_TEMPLATES_VERSION}.tar.gz \
+  && mkdir -p /root/.pandoc \
+  && ln -s /opt/pandoc/templates /root/.pandoc/templates \
+  && mkdir -p ${HOME}/.pandoc \
+  && ln -s /opt/pandoc/templates ${HOME}/.pandoc/templates \
+  && chown -R ${CT_USER}:${CT_GID} ${HOME}/.pandoc
 
 ## Install Microsoft ODBC driver and SQL commandline tools
 RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
@@ -45,7 +67,7 @@ RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
 ENV LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
-    PATH=/opt/conda/bin:/opt/mssql-tools/bin:${PATH} \
+    PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
@@ -87,6 +109,8 @@ USER ${CT_USER}
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
 RUN /opt/conda/bin/conda config --add channels conda-forge \
+    && /opt/conda/bin/conda config --add channels r \
+    && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda clean -tipsy \
     && rm ${CONDA_ENV_FILE} \
@@ -97,6 +121,16 @@ RUN /opt/conda/bin/conda config --add channels conda-forge \
     && rm -rf /home/${CT_USER}/.cache/yarn \
     && fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
+
+USER root
+
+RUN wget -q $RSTUDIO_URL \
+    && dpkg -i rstudio-server-*-amd64.deb \
+    && rm rstudio-server-*-amd64.deb
+
+COPY Rprofile.site /opt/conda/lib/R/etc
+
+USER ${CT_USER}
 
 RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \

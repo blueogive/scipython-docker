@@ -17,6 +17,7 @@ image include:
 * Matplotlib
 * Seaborn
 * Jupyter (Notebook, Lab)
+* Jupytext
 
 Additional packages are included for:
 * Documentation (Sphinx)
@@ -24,6 +25,13 @@ Additional packages are included for:
 * Linting (flake8)
 * Environment management (python-dotenv)
 * Database connectivity (sqlalchemy, pyodbc)
+
+In addition, it includes:
+* R (3.5.1)
+* RStudio-Server
+* Reticulate
+* [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-server-proxy/tree/master/contrib/rstudio) so you can launch an RStudio session from within Jupyter Notebook
+* and a collection of R packages
 
 ## Usage
 
@@ -62,5 +70,15 @@ Or copy and paste one of these URLs:
         http://(<container_id> or 127.0.0.1):8888/?token=<token_value>
 ```
 where `<container_id>` and `<token_value>` are hexadecimal strings unique to your instance. If the host name of the machine on which you executed the `docker run` command is `<host_name>`, open a web browser and put the following in the location bar: `http://<host_name>:10000/?token=<token_value>` to connect to the Jupyter Lab instance.
+
+If you want to get a shell prompt inside the container without starting a
+Jupyter server, just use the command above to start the notebook server but
+change the command at the end:
+
+```bash
+docker run -it --rm -v $(pwd):/home/docker/work -p 10000:8888 blueogive/scipython-docker:latest gosu 1000:100 /bin/bash
+```
+
+Pressing `CTRL-d` within the container will cause it to terminate.
 
 Contributions are welcome.
