@@ -36,6 +36,33 @@ RUN apt-get update --fix-missing \
         psmisc \
         sudo \
         wget \
+        build-essential \
+        fonts-texgyre \
+        gfortran \
+        default-jdk \
+        dpkg \
+        pandoc \
+        pandoc-citeproc \
+        # Linux system packages that are dependencies of R packages
+        libxml2-dev \
+        libcurl4-gnutls-dev \
+        liblapack-dev \
+        libgdal-dev \
+        libgeos-dev \
+        libproj-dev \
+        libcairo2-dev \
+        libssl1.0-dev \
+        unzip \
+        # Allow R pkgs requiring X11 to install/run using virtual framebuffer
+        xvfb \
+        xauth \
+        xfonts-base \
+        # MRO dependencies that don't sort themselves out on their own:
+        less \
+        libgomp1 \
+        libpango-1.0-0 \
+        libxt6 \
+        libsm6 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -51,7 +78,7 @@ RUN mkdir -p /opt/pandoc/templates \
   && ln -s /opt/pandoc/templates ${HOME}/.pandoc/templates \
   && chown -R ${CT_USER}:${CT_GID} ${HOME}/.pandoc
 
-## Install Microsoft ODBC driver and SQL commandline tools
+## Install Microsoft and Postgres ODBC drivers and SQL commandline tools
 RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && apt-key add microsoft.asc \
     && rm microsoft.asc \
@@ -60,23 +87,41 @@ RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
         msodbcsql17 \
         mssql-tools \
+        odbc-postgresql \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /etc/apt/sources.list.d/mssql-release.list
 
 ## Set environment variables
 ENV LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
     PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
+    MRO_VERSION_MAJOR=3 \
+    MRO_VERSION_MINOR=5 \
+    MRO_VERSION_BUGFIX=3 \
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
     CT_GID=100 \
-    CONDA_DIR=/opt/conda
+    CT_FMODE=0775 \
+    CONDA_DIR=/opt/conda \
+    FONT_LOCAL=/usr/local/share/fonts
+
+COPY fonts.zip ${FONT_LOCAL}
+
+WORKDIR ${FONT_LOCAL}
 
 ## Setup the locale
-RUN /usr/sbin/locale-gen ${LC_ALL} \
-    && /usr/sbin/update-locale LANG=${LANG}
+RUN unzip fonts.zip \
+    && rm fonts.zip \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+    && locale-gen en_US.utf8 \
+    && /usr/sbin/update-locale LANG=en_US.UTF-8 \
+    && git clone --branch release --depth 1 \
+    'https://github.com/adobe-fonts/source-code-pro.git' \
+    "${FONT_LOCAL}/adobe-fonts/source-code-pro" \
+    && fc-cache -f -v "${FONT_LOCAL}"
 
 RUN wget --quiet \
     https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh \
@@ -101,15 +146,44 @@ RUN conda install --quiet --yes 'tini=0.18.0' \
     && fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
 
-# WORKDIR /root
-ENV HOME=/home/${CT_USER}
+ENV HOME=/home/${CT_USER} \
+  MRO_VERSION=${MRO_VERSION_MAJOR}.${MRO_VERSION_MINOR}.${MRO_VERSION_BUGFIX}
+
 WORKDIR ${HOME}
+
+## Download and install MRO & MKL
+RUN curl -LO -# https://mran.blob.core.windows.net/install/mro/${MRO_VERSION}/ubuntu/microsoft-r-open-${MRO_VERSION}.tar.gz \
+    && tar -xzf microsoft-r-open-${MRO_VERSION}.tar.gz
+WORKDIR ${HOME}/microsoft-r-open
+RUN ./install.sh -a -u
+
+WORKDIR ${HOME}
+
+# Clean up downloaded files and install libpng
+RUN rm microsoft-r-open-*.tar.gz && \
+    rm -r microsoft-r-open && \
+    curl -LO -# https://mirrors.kernel.org/ubuntu/pool/main/libp/libpng/libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
+    dpkg -i libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
+    rm libpng12-0_1.2.54-1ubuntu1_amd64.deb
+
+COPY Renviron.site Renviron.site
+RUN mv Renviron.site /opt/microsoft/ropen/$MRO_VERSION/lib64/R/etc
+
+COPY rpkgs.csv rpkgs.csv
+COPY Rpkg_install.R Rpkg_install.R
+RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
+    xvfb-run Rscript Rpkg_install.R && \
+    rm rpkgs.csv Rpkg_install.R && \
+    chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
+    chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
+    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX && \
+    rm ${HOME}/.wget-hsts
+
 USER ${CT_USER}
 
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
 RUN /opt/conda/bin/conda config --add channels conda-forge \
-    && /opt/conda/bin/conda config --add channels r \
     && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda clean -tipsy \
@@ -124,9 +198,13 @@ RUN /opt/conda/bin/conda config --add channels conda-forge \
 
 USER root
 
+# Install RStudio-Server and the IRKernel package
 RUN wget -q $RSTUDIO_URL \
     && dpkg -i rstudio-server-*-amd64.deb \
-    && rm rstudio-server-*-amd64.deb
+    && rm rstudio-server-*-amd64.deb \
+    && Rscript -e "install.packages('IRkernel')" \
+    && Rscript -e "IRkernel::installspec(user=FALSE)" \
+    && fix-permissions ${HOME}/.local
 
 COPY Rprofile.site /opt/conda/lib/R/etc
 

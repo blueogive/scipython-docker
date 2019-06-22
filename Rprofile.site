@@ -1,1 +1,1 @@
-options(repos = c(CRAN = "https://mran.microsoft.com/snapshot/2019-05-15"))
+options(repos = c(CRAN = "https://cran.microsoft.com/snapshot/2019-04-15"))
