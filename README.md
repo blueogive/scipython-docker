@@ -16,6 +16,7 @@ image include:
 * Statsmodels
 * Matplotlib
 * Seaborn
+* spaCy
 * Jupyter (Notebook, Lab)
 * Jupytext
 

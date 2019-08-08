@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20190515
+FROM ubuntu:bionic-20190718
 
 USER root
 
@@ -127,9 +127,9 @@ RUN unzip fonts.zip \
     && fc-cache -f -v "${FONT_LOCAL}"
 
 RUN wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-4.7.10-Linux-x86_64.sh \
     -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "718259965f234088d785cad1fbd7de03" ]; then \
+    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "1c945f2b3335c7b2b15130b1b2dc5cf4" ]; then \
         /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
     rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
@@ -189,9 +189,10 @@ COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
 RUN /opt/conda/bin/conda config --add channels conda-forge \
     && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
-    && /opt/conda/bin/conda clean -tipsy \
-    && rm ${CONDA_ENV_FILE} \
-    && jupyter labextension install @jupyterlab/hub-extension@^0.12.0 \
+    && /opt/conda/bin/conda install conda-build \
+    && /opt/conda/bin/conda build purge-all \
+    && rm ${CONDA_ENV_FILE}
+RUN jupyter labextension install @jupyterlab/hub-extension \
     && npm cache clean --force \
     && jupyter notebook --generate-config \
     && rm -rf ${CONDA_DIR}/share/jupyter/lab/staging \
