@@ -182,7 +182,8 @@ USER ${CT_USER}
 
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
-RUN /opt/conda/bin/conda config --add channels conda-forge \
+RUN /opt/conda/bin/conda update -n base -c defaults conda \
+    && /opt/conda/bin/conda config --add channels conda-forge \
     && /opt/conda/bin/conda config --set channel_priority strict \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda install conda-build \
