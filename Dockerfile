@@ -202,6 +202,8 @@ RUN jupyter labextension install @jupyterlab/hub-extension \
 
 USER root
 
+RUN jupyter lab build
+
 # Install RStudio-Server and the IRKernel package
 RUN wget -q $RSTUDIO_URL \
     && dpkg -i rstudio-server-*-amd64.deb \
