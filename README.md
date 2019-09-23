@@ -22,14 +22,14 @@ image include:
 
 Additional packages are included for:
 * Documentation (Sphinx)
-* Unit testing (pytest, coverage)
+* Testing (pytest, coverage)
 * Linting (flake8)
 * Environment management (python-dotenv)
 * Database connectivity (sqlalchemy, pyodbc)
 
 In addition, it includes:
-* R (3.5.1)
-* RStudio-Server
+* R (3.5.3)
+* RStudio-Server (1.2)
 * Reticulate
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-server-proxy/tree/master/contrib/rstudio) so you can launch an RStudio session from within Jupyter Notebook
 * and a collection of R packages
@@ -84,5 +84,13 @@ docker run -it --rm -v $(pwd):/home/docker/work -p 10000:8888 blueogive/scipytho
 ```
 
 Pressing `CTRL-d` within the container will cause it to terminate.
+
+## RStudio
+
+To launch RStudio(-Server), start the container using either the Jupyter Lab or
+Jupyter Notebook commands above. Then, connect to the Jupyter server using your
+browser. If you started Jupyter Lab, use the menu to 'Launch Classic Notebook'.
+If you started a Jupyter Notebook, skip that step. Within the class Notebook,
+click `New`, and select `RStudio`.
 
 Contributions are welcome.
