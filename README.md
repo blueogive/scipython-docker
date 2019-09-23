@@ -56,13 +56,15 @@ I borrowed much of the apparatus for enabling the launch of Jupyter Notebook/Lab
 ## Jupyter Notebook
 
 ```bash
-docker run -it --rm -v $(pwd):/home/docker/work -p 10000:8888 blueogive/scipython-docker:latest gosu 1000:100 start-notebook.sh
+docker run -it --init --rm -v $(pwd):/home/docker/work -p 10000:8888 blueogive/scipython-docker:latest gosu 1000:100 start-notebook.sh
 ```
+
+Note that the `--init` argument is necessary for the Jupyter process to start correctly within the container.
 
 ## Jupyter Lab
 
 ```bash
-docker run -it --rm -v $(pwd):/home/docker/work -p 10000:8888 -e JUPYTER_ENABLE_LAB=yes blueogive/scipython-docker:latest gosu 1000:100 start-notebook.sh
+docker run -it --init --rm -v $(pwd):/home/docker/work -p 10000:8888 -e JUPYTER_ENABLE_LAB=yes blueogive/scipython-docker:latest gosu 1000:100 start-notebook.sh
 ```
 As the container starts, it will echo a bit of output to the console ending with statement similar to:
 
@@ -72,9 +74,10 @@ Or copy and paste one of these URLs:
 ```
 where `<container_id>` and `<token_value>` are hexadecimal strings unique to your instance. If the host name of the machine on which you executed the `docker run` command is `<host_name>`, open a web browser and put the following in the location bar: `http://<host_name>:10000/?token=<token_value>` to connect to the Jupyter Lab instance.
 
-If you want to get a shell prompt inside the container without starting a
-Jupyter server, just use the command above to start the notebook server but
-change the command at the end:
+If you want a shell prompt as a non-root user inside the container without
+starting a Jupyter server, use the command below, noting that above to start the
+notebook server but change the command at the end and remove the `--init`
+argument:
 
 ```bash
 docker run -it --rm -v $(pwd):/home/docker/work -p 10000:8888 blueogive/scipython-docker:latest gosu 1000:100 /bin/bash

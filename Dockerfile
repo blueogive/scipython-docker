@@ -142,13 +142,6 @@ ADD fix-permissions /usr/local/bin/fix-permissions
 ## User should also have & own a home directory (e.g. for linked volumes to work properly).
 RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_USER}
 
-# Install Tini
-RUN conda install --quiet --yes 'tini=0.18.0' \
-    && conda list tini | grep tini | tr -s ' ' | cut -d ' ' -f 1,2 >> ${CONDA_DIR}/conda-meta/pinned \
-    && conda clean --all -f -y \
-    && fix-permissions ${CONDA_DIR} \
-    && fix-permissions /home/${CT_USER}
-
 ENV HOME=/home/${CT_USER} \
   MRO_VERSION=${MRO_VERSION_MAJOR}.${MRO_VERSION_MINOR}.${MRO_VERSION_BUGFIX}
 
@@ -181,6 +174,9 @@ RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX && \
     rm ${HOME}/.wget-hsts
+
+RUN fix-permissions ${CONDA_DIR} \
+    && fix-permissions /home/${CT_USER}
 
 USER ${CT_USER}
 
@@ -248,9 +244,6 @@ USER root
 
 EXPOSE 8888
 WORKDIR ${HOME}/work
-
-# Configure container startup
-ENTRYPOINT ["tini", "-g", "--"]
 
 # Add local files as late as possible to avoid cache busting
 COPY start.sh /usr/local/bin/
