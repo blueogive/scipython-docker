@@ -10,12 +10,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20190718
+FROM ubuntu:bionic-20191202
 
 USER root
 
-ENV RSTUDIO_VERSION=1.2.1335 \
-    PANDOC_TEMPLATES_VERSION=2.7.2
+ENV RSTUDIO_VERSION=1.2.5033 \
+    PANDOC_TEMPLATES_VERSION=2.9.1
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"
 
 RUN apt-get update --fix-missing \
@@ -127,9 +127,9 @@ RUN unzip fonts.zip \
     && fc-cache -f -v "${FONT_LOCAL}"
 
 RUN wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-4.7.10-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh \
     -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "1c945f2b3335c7b2b15130b1b2dc5cf4" ]; then \
+    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "81c773ff87af5cfac79ab862942ab6b3" ]; then \
         /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
     rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
@@ -217,11 +217,16 @@ RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
     mkdir ${HOME}/work
 SHELL [ "/bin/bash", "--login", "-c"]
+ARG PIP_REQ_FILE=${PIP_REQ_FILE}
+COPY ${PIP_REQ_FILE} ${PIP_REQ_FILE}
 RUN source ${HOME}/.bashrc \
     && conda activate base \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt \
+    && pip install --user --no-cache-dir --disable-pip-version-check \
+      -r ${PIP_REQ_FILE} \
+    && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
     && fix-permissions ${HOME}/work
 COPY pip.conf .config/pip/pip.conf
@@ -243,7 +248,10 @@ LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
 
 USER root
 
+# jupyter port
 EXPOSE 8888
+# dagit port
+EXPOSE 3000
 WORKDIR ${HOME}/work
 
 # Add local files as late as possible to avoid cache busting

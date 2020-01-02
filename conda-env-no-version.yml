@@ -13,6 +13,7 @@ dependencies:
   - aiohttp
   - alabaster
   - alembic
+  - alsa-lib
   - argh
   - asn1crypto
   - astroid
@@ -33,6 +34,7 @@ dependencies:
   - bzip2
   - ca-certificates
   - cairo
+  - catalogue
   - certifi
   - certipy
   - cffi
@@ -64,7 +66,7 @@ dependencies:
   - font-ttf-source-code-pro
   - font-ttf-ubuntu
   - fontconfig
-  - fonts-anaconda
+  - fonts-anaconda=1=h8fa9717_0
   - freetype
   - fribidi
   - gcc_impl_linux-64
@@ -73,6 +75,7 @@ dependencies:
   - gettext
   - gfortran_impl_linux-64
   - gfortran_linux-64
+  - giflib
   - glib
   - glob2
   - gmp
@@ -120,9 +123,12 @@ dependencies:
   - kiwisolver
   - krb5
   - lazy-object-proxy
+  - lcms2
+  - ld_impl_linux-64
   - libarchive
   - libblas
   - libcblas
+  - libclang
   - libcurl
   - libedit
   - libffi
@@ -132,6 +138,7 @@ dependencies:
   - liblapack
   - liblapacke
   - liblief
+  - libllvm9
   - libntlm
   - libopenblas
   - libpng
@@ -141,7 +148,9 @@ dependencies:
   - libstdcxx-ng
   - libtiff
   - libuuid
+  - libuv
   - libxcb
+  - libxkbcommon
   - libxml2
   - libxslt
   - lxml
@@ -167,6 +176,8 @@ dependencies:
   - ncurses
   - nodejs
   - notebook
+  - nspr
+  - nss
   - numpy
   - oauthlib
   - openjdk
@@ -198,6 +209,7 @@ dependencies:
   - psutil
   - psycopg2
   - pthread-stubs
+  - ptvsd
   - ptyprocess
   - py
   - py-lief
@@ -219,7 +231,7 @@ dependencies:
   - pyrsistent
   - pysocks
   - pytest
-  - python=3.7.3
+  - python=3.7.6=h357f687_1
   - python-dateutil
   - python-dotenv
   - python-editor
@@ -278,6 +290,8 @@ dependencies:
   - wheel
   - widgetsnbextension
   - wrapt
+  - xorg-fixesproto
+  - xorg-inputproto
   - xorg-kbproto
   - xorg-libice
   - xorg-libsm
@@ -285,8 +299,12 @@ dependencies:
   - xorg-libxau
   - xorg-libxdmcp
   - xorg-libxext
+  - xorg-libxfixes
+  - xorg-libxi
   - xorg-libxrender
   - xorg-libxt
+  - xorg-libxtst
+  - xorg-recordproto
   - xorg-renderproto
   - xorg-xextproto
   - xorg-xproto
@@ -297,4 +315,7 @@ dependencies:
   - zipp
   - zlib
   - zstd
+  - pip:
+    - pyqt5-sip==4.19.18
+    - pyqtwebengine==5.12.1
 prefix: /opt/conda
