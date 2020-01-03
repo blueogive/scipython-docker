@@ -67,6 +67,7 @@ dependencies:
   - font-ttf-ubuntu
   - fontconfig
   - fonts-anaconda=1=h8fa9717_0
+  - freetds
   - freetype
   - fribidi
   - gcc_impl_linux-64
@@ -223,6 +224,7 @@ dependencies:
   - pygments
   - pyjwt
   - pylint
+  - pymssql
   - pyodbc
   - pyopenssl
   - pyparsing
