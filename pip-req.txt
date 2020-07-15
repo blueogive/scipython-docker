@@ -1,5 +1,8 @@
-dagit
-dagster
-dagster-ge
-dagster-pandas
-jinjasql
+dagit==0.8.7
+dagster==0.8.7
+dagster-ge==0.8.7
+dagster-graphql==0.8.7
+dagster-pandas==0.8.7
+herepy==3.0.1
+jinjasql==0.1.8
+umap==0.1.1

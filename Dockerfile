@@ -47,9 +47,12 @@ RUN apt-get update --fix-missing \
         libxml2-dev \
         libcurl4-gnutls-dev \
         liblapack-dev \
-        libgdal-dev \
+        # libgdal-dev \
+        # default-libmysqlclient-dev \
+        # libmysqlclient-dev \
         libgeos-dev \
         libproj-dev \
+        # libssl-dev \
         libcairo2-dev \
         libssl1.0-dev \
         unzip \
@@ -132,7 +135,7 @@ RUN wget --quiet \
     if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "81c773ff87af5cfac79ab862942ab6b3" ]; then \
         /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
     rm /root/miniconda.sh && \
-    /opt/conda/bin/conda clean -tipsy && \
+    /opt/conda/bin/conda clean -atipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 
 # Add a script that we will use to correct permissions after running certain commands
@@ -188,6 +191,7 @@ RUN /opt/conda/bin/conda update -n base -c defaults conda \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda install conda-build \
     && /opt/conda/bin/conda build purge-all \
+    && /opt/conda/bin/conda clean -atipsy \
     && rm ${CONDA_ENV_FILE}
 RUN jupyter labextension install @jupyterlab/hub-extension \
     && npm cache clean --force \

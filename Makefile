@@ -5,6 +5,7 @@
 CONDA_ENV_FILE := conda-env.yml
 # CONDA_ENV_FILE := conda-env-no-version.yml
 PIP_REQ_FILE := pip-req.txt
+# PIP_REQ_FILE := pip-req-no-version.txt
 VCS_URL := $(shell git remote get-url --push gh)
 VCS_REF := $(shell git rev-parse --short HEAD)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
