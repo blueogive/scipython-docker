@@ -1,8 +1,8 @@
-dagit==0.8.7
-dagster==0.8.7
-dagster-ge==0.8.7
-dagster-graphql==0.8.7
-dagster-pandas==0.8.7
+dagit==0.8.8
+dagster==0.8.8
+dagster-ge==0.8.8
+dagster-pandas==0.8.8
 herepy==3.0.1
 jinjasql==0.1.8
-umap==0.1.1
+pynndescent==0.4.8
+umap-learn==0.4.6

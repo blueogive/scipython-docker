@@ -93,13 +93,12 @@ dependencies:
   - imagesize=1.2.0=py_0
   - importlib-metadata=1.7.0=py37hc8dfbb8_0
   - importlib_metadata=1.7.0=0
-  - iniconfig=1.0.0=pyh9f0ad1d_0
   - intel-openmp=2019.4=243
   - ipykernel=5.3.2=py37h43977f1_0
   - ipython=7.16.1=py37h43977f1_0
   - ipython_genutils=0.2.0=py_1
   - ipywidgets=7.5.1=py_0
-  - isort=4.3.21=py37hc8dfbb8_1
+  - isort=5.1.1=py37hc8dfbb8_0
   - jedi=0.17.1=py37hc8dfbb8_0
   - jellyfish=0.7.2=py37h8f50634_1
   - jinja2=2.11.2=pyh9f0ad1d_0
@@ -118,7 +117,7 @@ dependencies:
   - jupyter_highlight_selected_word=0.2.0=py37_1000
   - jupyter_latex_envs=1.4.6=py37_1000
   - jupyter_nbextensions_configurator=0.4.1=py37hc8dfbb8_1
-  - jupyterlab=2.1.5=py_0
+  - jupyterlab=2.2.0=py_0
   - jupyterlab_server=1.2.0=py_0
   - jupytext=1.5.1=pyh9f0ad1d_0
   - kiwisolver=1.2.0=py37h99015e2_0
@@ -142,9 +141,9 @@ dependencies:
   - liblief=0.9.0=hf8a498c_1
   - libllvm9=9.0.1=he513fc3_1
   - libntlm=1.4=h516909a_1002
-  - libopenblas=0.3.10=h5ec1e0e_0
+  - libopenblas=0.3.10=pthreads_hb3c22a3_2
   - libpng=1.6.37=hed695b0_1
-  - libpq=12.2=h5513abc_1
+  - libpq=12.3=h5513abc_0
   - libsodium=1.0.17=h516909a_0
   - libssh2=1.9.0=hab1572f_3
   - libstdcxx-ng=9.2.0=hdf63c60_2
@@ -177,19 +176,19 @@ dependencies:
   - murmurhash=1.0.0=py37h3340039_0
   - nbconvert=5.6.1=py37hc8dfbb8_1
   - nbformat=5.0.7=py_0
-  - ncurses=6.1=hf484d3e_1002
+  - ncurses=6.2=he1b5a44_1
   - nodejs=13.13.0=hf5d1a2b_0
   - notebook=6.0.3=py37hc8dfbb8_1
   - nspr=4.26=he1b5a44_0
   - nss=3.47=he751ad9_0
-  - numpy=1.18.5=py37h8960a57_0
+  - numpy=1.19.0=py37h8960a57_0
   - oauthlib=3.0.1=py_0
   - openjdk=11.0.1=h516909a_1016
   - openssl=1.1.1g=h516909a_0
   - packaging=20.4=pyh9f0ad1d_0
   - pamela=1.0.0=py_0
   - pandas=1.0.5=py37h0da4684_0
-  - pandoc=2.10=0
+  - pandoc=2.10=h14c3975_0
   - pandocfilters=1.4.2=py_1
   - pango=1.42.4=h7062337_4
   - parso=0.7.0=pyh9f0ad1d_0
@@ -211,7 +210,7 @@ dependencies:
   - prometheus_client=0.8.0=pyh9f0ad1d_0
   - prompt-toolkit=3.0.5=py_1
   - prompt_toolkit=3.0.5=1
-  - psutil=5.7.0=py37h8f50634_1
+  - psutil=5.7.2=py37h8f50634_0
   - psycopg2=2.8.5=py37hb09aad4_1
   - pthread-stubs=0.4=h14c3975_1001
   - ptvsd=4.3.2=py37h516909a_1
@@ -227,7 +226,7 @@ dependencies:
   - pyflakes=2.2.0=pyh9f0ad1d_0
   - pygments=2.6.1=py_0
   - pyjwt=1.7.1=py_0
-  - pylint=2.5.3=py37hc8dfbb8_0
+  - pylint=2.3.1=py37_0
   - pymssql=2.1.4=py37hf484d3e_2001
   - pyodbc=4.0.30=py37he1b5a44_0
   - pyopenssl=19.1.0=py_1
@@ -236,7 +235,7 @@ dependencies:
   - pyqt=5.12.3=py37h8685d9f_3
   - pyrsistent=0.16.0=py37h8f50634_0
   - pysocks=1.7.1=py37hc8dfbb8_1
-  - pytest=6.0.0rc1=py37hc8dfbb8_1
+  - pytest=5.4.3=py37hc8dfbb8_0
   - python=3.7.6=h357f687_1
   - python-dateutil=2.8.1=py_0
   - python-dotenv=0.14.0=pyh9f0ad1d_0
@@ -249,12 +248,12 @@ dependencies:
   - qt=5.12.5=hd8c4c69_1
   - qtconsole=4.7.5=pyh9f0ad1d_0
   - qtpy=1.9.0=py_0
-  - readline=8.0=h46ee950_1
+  - readline=8.0=he28a2e2_2
   - requests=2.24.0=pyh9f0ad1d_0
   - ripgrep=12.1.1=h516909a_0
   - ruamel_yaml=0.15.80=py37h8f50634_1001
   - scikit-learn=0.23.1=py37h8a51577_0
-  - scipy=1.5.0=py37ha3d9a3c_0
+  - scipy=1.5.1=py37ha3d9a3c_0
   - seaborn=0.10.1=1
   - seaborn-base=0.10.1=py_1
   - send2trash=1.5.0=py_0
@@ -288,13 +287,13 @@ dependencies:
   - tktable=2.10=h555a92e_3
   - toml=0.10.1=pyh9f0ad1d_0
   - tornado=6.0.4=py37h8f50634_1
-  - tqdm=4.47.0=pyh9f0ad1d_0
+  - tqdm=4.48.0=pyh9f0ad1d_0
   - traitlets=4.3.3=py37hc8dfbb8_1
   - typed-ast=1.4.1=py37h516909a_0
   - typing_extensions=3.7.4.2=py_0
   - unixodbc=2.3.7=hd1b7508_1000
   - urllib3=1.25.9=py_0
-  - wasabi=0.7.0=pyh9f0ad1d_0
+  - wasabi=0.7.1=pyh9f0ad1d_0
   - watchdog=0.10.3=py37hc8dfbb8_0
   - wcwidth=0.2.5=pyh9f0ad1d_0
   - webencodings=0.5.1=py_1
@@ -331,4 +330,3 @@ dependencies:
     - pyqtchart==5.12
     - pyqtwebengine==5.12.1
 prefix: /opt/conda
-
