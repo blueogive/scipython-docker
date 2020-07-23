@@ -2,6 +2,8 @@ dagit==0.8.8
 dagster==0.8.8
 dagster-ge==0.8.8
 dagster-pandas==0.8.8
+dedupe==2.0.3
+great-expectations==0.11.8
 herepy==3.0.1
 jinjasql==0.1.8
 pynndescent==0.4.8

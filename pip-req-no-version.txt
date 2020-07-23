@@ -2,6 +2,8 @@ dagit
 dagster
 dagster-ge
 dagster-pandas
+dedupe
+great-expectations
 herepy
 jinjasql
 pynndescent

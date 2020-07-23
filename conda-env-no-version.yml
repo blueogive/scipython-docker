@@ -9,6 +9,7 @@ channels:
   - defaults
 dependencies:
   - _libgcc_mutex
+  - _openmp_mutex
   - _r-mutex
   - aiohttp
   - alabaster
@@ -20,6 +21,7 @@ dependencies:
   - async-timeout
   - async_generator
   - atk
+  - atk-1.0=2.36.0=haf93ef1_0
   - atomicwrites
   - attrs
   - babel
@@ -30,6 +32,7 @@ dependencies:
   - blas
   - bleach
   - blinker
+  - brotlipy
   - bwidget
   - bzip2
   - ca-certificates
@@ -93,6 +96,7 @@ dependencies:
   - idna
   - idna_ssl
   - imagesize
+  - importlib-metadata
   - importlib_metadata
   - intel-openmp
   - ipykernel
@@ -135,6 +139,7 @@ dependencies:
   - libffi
   - libgcc-ng
   - libgfortran-ng
+  - libgomp
   - libiconv
   - liblapack
   - liblapacke
@@ -150,10 +155,12 @@ dependencies:
   - libtiff
   - libuuid
   - libuv
+  - libwebp-base
   - libxcb
   - libxkbcommon
   - libxml2
   - libxslt
+  - llvm-openmp
   - lxml
   - lz4-c
   - lzo
@@ -206,6 +213,7 @@ dependencies:
   - preshed
   - proj4
   - prometheus_client
+  - prompt-toolkit
   - prompt_toolkit
   - psutil
   - psycopg2
@@ -238,11 +246,13 @@ dependencies:
   - python-dotenv
   - python-editor
   - python-libarchive-c
+  - python_abi
   - pytz
   - pyyaml
   - pyzmq
   - qt
   - qtconsole
+  - qtpy
   - readline
   - requests
   - ripgrep
@@ -250,6 +260,7 @@ dependencies:
   - scikit-learn
   - scipy
   - seaborn
+  - seaborn-base
   - send2trash
   - setuptools
   - simpervisor
@@ -275,9 +286,11 @@ dependencies:
   - testfixtures
   - testpath
   - thinc
+  - threadpoolctl
   - tini
   - tk
   - tktable
+  - toml
   - tornado
   - tqdm
   - traitlets
@@ -319,5 +332,6 @@ dependencies:
   - zstd
   - pip:
     - pyqt5-sip==4.19.18
+    - pyqtchart==5.12
     - pyqtwebengine==5.12.1
 prefix: /opt/conda

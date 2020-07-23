@@ -228,11 +228,15 @@ RUN source ${HOME}/.bashrc \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt \
+    && git clone https://github.com/blueogive/py_qualtrics_api.git \
+    && pip install --user --no-cache-dir --disable-pip-version-check py_qualtrics_api/ \
+    && rm -rf py_qualtrics_api \
     && pip install --user --no-cache-dir --disable-pip-version-check \
       -r ${PIP_REQ_FILE} \
     && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
-    && fix-permissions ${HOME}/work
+    && fix-permissions ${HOME}/work \
+    && fix-permissions ${HOME}/.local
 COPY pip.conf .config/pip/pip.conf
 WORKDIR ${HOME}/work
 
@@ -263,6 +267,10 @@ COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
+COPY sqlalchemy_dataset.patch ${HOME}/work
 RUN fix-permissions /etc/jupyter/
+
+RUN patch ${HOME}/.local/lib/python3.7/site-packages/great_expectations/dataset/sqlalchemy_dataset.py sqlalchemy_dataset.patch && \
+    rm sqlalchemy_dataset.patch
 
 CMD [ "/bin/bash" ]
