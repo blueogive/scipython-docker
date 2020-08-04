@@ -1,3 +1,4 @@
+cx-Oracle
 dagit
 dagster
 dagster-ge

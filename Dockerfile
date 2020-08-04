@@ -130,9 +130,9 @@ RUN unzip fonts.zip \
     && fc-cache -f -v "${FONT_LOCAL}"
 
 RUN wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux-x86_64.sh \
     -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "81c773ff87af5cfac79ab862942ab6b3" ]; then \
+    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "751786b92c00b1aeae3f017b781018df" ]; then \
         /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
     rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -atipsy && \
@@ -236,8 +236,12 @@ RUN source ${HOME}/.bashrc \
     && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
     && fix-permissions ${HOME}/work \
-    && fix-permissions ${HOME}/.local
+    && fix-permissions ${HOME}/.local \
+    # great_expectations v0.11.9 requires this brute-force bug fix, at
+    # least with Python 3.7
+    && grep -rl ruamel\.yaml ~/.local/lib/python3.7/site-packages/great_expectations | xargs sed -i s/ruamel\.yaml/ruamel_yaml/g
 COPY pip.conf .config/pip/pip.conf
+ENV PATH=${HOME}/.local/bin:${PATH}
 WORKDIR ${HOME}/work
 
 ARG VCS_URL=${VCS_URL}
@@ -260,17 +264,12 @@ USER root
 EXPOSE 8888
 # dagit port
 EXPOSE 3000
-WORKDIR ${HOME}/work
 
 # Add local files as late as possible to avoid cache busting
 COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
-COPY sqlalchemy_dataset.patch ${HOME}/work
 RUN fix-permissions /etc/jupyter/
-
-RUN patch ${HOME}/.local/lib/python3.7/site-packages/great_expectations/dataset/sqlalchemy_dataset.py sqlalchemy_dataset.patch && \
-    rm sqlalchemy_dataset.patch
 
 CMD [ "/bin/bash" ]
