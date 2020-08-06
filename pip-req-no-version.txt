@@ -7,5 +7,7 @@ dedupe
 great-expectations
 herepy
 jinjasql
+ptvsd
 pynndescent
+recordlinkage
 umap-learn
