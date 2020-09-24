@@ -1,5 +1,0 @@
-#!/usr/bin/env R
-
-TCL_LIBRARY=${R_SHARE_DIR}/tcl8.6/
-# Point curl to the appropriate CA file
-CURL_CA_BUNDLE=/opt/microsoft/ropen/3.5.3/lib64/R/lib/microsoft-r-cacert.pem

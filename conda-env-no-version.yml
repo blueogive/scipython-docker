@@ -23,13 +23,13 @@ dependencies:
   - async-timeout
   - async_generator
   - atk
-  - atk-1.0=2.36.0=haf93ef1_1
+  - atk-1.0
   - atomicwrites
   - attrs
   - babel
   - backcall
   - backports
-  - backports.functools_lru_cache=1.6.1=py_0
+  - backports.functools_lru_cache
   - beautifulsoup4
   - binutils_impl_linux-64
   - binutils_linux-64
@@ -129,6 +129,7 @@ dependencies:
   - jupyter_latex_envs
   - jupyter_nbextensions_configurator
   - jupyterlab
+  - jupyterlab_pygments
   - jupyterlab_server
   - jupytext
   - kernel-headers_linux-64
@@ -144,6 +145,7 @@ dependencies:
   - libcurl
   - libedit
   - libev
+  - libevent
   - libffi
   - libgcc-devel_linux-64
   - libgcc-ng
@@ -153,6 +155,7 @@ dependencies:
   - liblapack
   - liblapacke
   - liblief
+  - libllvm10
   - libllvm9
   - libnghttp2
   - libntlm
@@ -177,6 +180,7 @@ dependencies:
   - lzo
   - make
   - mako
+  - markdown-it-py
   - markupsafe
   - matplotlib
   - matplotlib-base
@@ -190,9 +194,13 @@ dependencies:
   - more-itertools
   - multidict
   - murmurhash
+  - mysql-common
+  - mysql-libs
+  - nbclient
   - nbconvert
   - nbformat
   - ncurses
+  - nest-asyncio
   - nodejs
   - notebook
   - nspr
@@ -250,11 +258,10 @@ dependencies:
   - pyopenssl
   - pyparsing
   - pyproj
-  - pyqt
   - pyrsistent
   - pysocks
   - pytest
-  - python=3.7.8=h6f2ec95_1_cpython
+  - python
   - python-dateutil
   - python-dotenv
   - python-editor
@@ -345,7 +352,8 @@ dependencies:
   - zlib
   - zstd
   - pip:
-    - pyqt5-sip
-    - pyqtchart
-    - pyqtwebengine
+    - pyqt5==5.15.1
+    - pyqt5-sip==12.8.1
+    - pyqtchart==5.15.1
+    - pyqtwebengine==5.15.1
 prefix: /opt/conda

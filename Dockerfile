@@ -10,12 +10,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20191202
+FROM ubuntu:focal-20200916
 
 USER root
 
 ENV RSTUDIO_VERSION=1.2.5033 \
-    PANDOC_TEMPLATES_VERSION=2.9.1
+    PANDOC_TEMPLATES_VERSION=2.10.1 \
+    DEBIAN_FRONTEND=noninteractive
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"
 
 RUN apt-get update --fix-missing \
@@ -29,7 +30,6 @@ RUN apt-get update --fix-missing \
         gosu \
         libapparmor1 \
         libclang-dev \
-        libssl1.0-dev \
         locales \
         lsb-release \
         make \
@@ -52,9 +52,7 @@ RUN apt-get update --fix-missing \
         # libmysqlclient-dev \
         libgeos-dev \
         libproj-dev \
-        # libssl-dev \
         libcairo2-dev \
-        libssl1.0-dev \
         unzip \
         # Allow R pkgs requiring X11 to install/run using virtual framebuffer
         xvfb \
@@ -85,7 +83,7 @@ RUN mkdir -p /opt/pandoc/templates \
 RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && apt-key add microsoft.asc \
     && rm microsoft.asc \
-    && curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
         msodbcsql17 \
@@ -100,9 +98,6 @@ ENV LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
     PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
-    MRO_VERSION_MAJOR=3 \
-    MRO_VERSION_MINOR=5 \
-    MRO_VERSION_BUGFIX=3 \
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
@@ -130,9 +125,9 @@ RUN unzip fonts.zip \
     && fc-cache -f -v "${FONT_LOCAL}"
 
 RUN wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh \
     -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "751786b92c00b1aeae3f017b781018df" ]; then \
+    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "d63adf39f2c220950a063e0529d4ff74" ]; then \
         /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
     rm /root/miniconda.sh && \
     /opt/conda/bin/conda clean -atipsy && \
@@ -143,30 +138,30 @@ ADD fix-permissions /usr/local/bin/fix-permissions
 
 ## Set a default user. Available via runtime flag `--user docker`
 ## User should also have & own a home directory (e.g. for linked volumes to work properly).
-RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} ${CT_USER}
+RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} \
+    --password ${CT_USER} ${CT_USER}
 
-ENV HOME=/home/${CT_USER} \
-  MRO_VERSION=${MRO_VERSION_MAJOR}.${MRO_VERSION_MINOR}.${MRO_VERSION_BUGFIX}
-
-WORKDIR ${HOME}
-
-## Download and install MRO & MKL
-RUN curl -LO -# https://mran.blob.core.windows.net/install/mro/${MRO_VERSION}/ubuntu/microsoft-r-open-${MRO_VERSION}.tar.gz \
-    && tar -xzf microsoft-r-open-${MRO_VERSION}.tar.gz
-WORKDIR ${HOME}/microsoft-r-open
-RUN ./install.sh -a -u
+ENV HOME=/home/${CT_USER}
 
 WORKDIR ${HOME}
 
-# Clean up downloaded files and install libpng
-RUN rm microsoft-r-open-*.tar.gz && \
-    rm -r microsoft-r-open && \
-    curl -LO -# https://mirrors.kernel.org/ubuntu/pool/main/libp/libpng/libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
-    dpkg -i libpng12-0_1.2.54-1ubuntu1_amd64.deb && \
-    rm libpng12-0_1.2.54-1ubuntu1_amd64.deb
-
-COPY Renviron.site Renviron.site
-RUN mv Renviron.site /opt/microsoft/ropen/$MRO_VERSION/lib64/R/etc
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
+    /etc/apt/sources.list.d/cran40.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com \
+        --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        r-base \
+        r-base-dev \
+        littler \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /usr/local/lib/R/etc/ \
+    && echo "R_LIBS_SITE=${R_LIBS_SITE-'/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
+        >> ${HOME}/.Renviron \
+    && echo \
+        "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" \
+        >> /usr/local/lib/R/etc/Rprofile.site
 
 COPY rpkgs.csv rpkgs.csv
 COPY Rpkg_install.R Rpkg_install.R
@@ -175,8 +170,9 @@ RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
     rm rpkgs.csv Rpkg_install.R && \
     chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
-    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX && \
-    rm ${HOME}/.wget-hsts
+    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX
+
+WORKDIR ${HOME}
 
 RUN fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
@@ -193,17 +189,19 @@ RUN /opt/conda/bin/conda update -n base -c defaults conda \
     && /opt/conda/bin/conda build purge-all \
     && /opt/conda/bin/conda clean -atipsy \
     && rm ${CONDA_ENV_FILE}
+
+RUN mkdir -p ${HOME}/.jupyter/lab
+ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
 RUN jupyter labextension install @jupyterlab/hub-extension \
     && npm cache clean --force \
     && jupyter notebook --generate-config \
+    && jupyter lab build \
     && rm -rf ${CONDA_DIR}/share/jupyter/lab/staging \
-    && rm -rf /home/${CT_USER}/.cache/yarn \
+    && rm -rf ${HOME}/.cache/yarn \
     && fix-permissions ${CONDA_DIR} \
-    && fix-permissions /home/${CT_USER}
+    && fix-permissions ${HOME}
 
 USER root
-
-RUN jupyter lab build
 
 # Install RStudio-Server and the IRKernel package
 RUN wget -q $RSTUDIO_URL \
@@ -212,8 +210,6 @@ RUN wget -q $RSTUDIO_URL \
     && Rscript -e "install.packages('IRkernel')" \
     && Rscript -e "IRkernel::installspec(user=FALSE)" \
     && fix-permissions ${HOME}/.local
-
-COPY Rprofile.site /opt/conda/lib/R/etc
 
 USER ${CT_USER}
 
@@ -231,15 +227,15 @@ RUN source ${HOME}/.bashrc \
     && git clone https://github.com/blueogive/py_qualtrics_api.git \
     && pip install --user --no-cache-dir --disable-pip-version-check py_qualtrics_api/ \
     && rm -rf py_qualtrics_api \
+    && git clone https://github.com/jupyterhub/jupyter-rsession-proxy.git \
+    && pip install --user --no-cache-dir --disable-pip-version-check jupyter-rsession-proxy/ \
+    && rm -rf jupyter-rsession-proxy \
     && pip install --user --no-cache-dir --disable-pip-version-check \
       -r ${PIP_REQ_FILE} \
     && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
     && fix-permissions ${HOME}/work \
-    && fix-permissions ${HOME}/.local \
-    # great_expectations v0.11.9 requires this brute-force bug fix, at
-    # least with Python 3.7
-    && grep -rl ruamel\.yaml ~/.local/lib/python3.7/site-packages/great_expectations | xargs sed -i s/ruamel\.yaml/ruamel_yaml/g
+    && fix-permissions ${HOME}/.local 
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${PATH}
 WORKDIR ${HOME}/work

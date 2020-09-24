@@ -28,11 +28,11 @@ Additional packages are included for:
 * Database connectivity (sqlalchemy, pyodbc)
 
 In addition, it includes:
-* R (3.5.3)
+* R (4.0.2)
 * RStudio-Server (1.2)
 * Reticulate
-* [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-server-proxy/tree/master/contrib/rstudio) so you can launch an RStudio session from within Jupyter Notebook
-* and a collection of R packages
+* [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) so you can launch an RStudio session from within Jupyter Notebook
+* and a collection of R packages centered around the [tidyverse](https://tidyverse.org) and literate programming.
 
 ## Usage
 
@@ -72,7 +72,11 @@ As the container starts, it will echo a bit of output to the console ending with
 Or copy and paste one of these URLs:
         http://(<container_id> or 127.0.0.1):8888/?token=<token_value>
 ```
-where `<container_id>` and `<token_value>` are hexadecimal strings unique to your instance. If the host name of the machine on which you executed the `docker run` command is `<host_name>`, open a web browser and put the following in the location bar: `http://<host_name>:10000/?token=<token_value>` to connect to the Jupyter Lab instance.
+where `<container_id>` and `<token_value>` are hexadecimal strings unique to 
+your instance. If the host name of the machine on which you executed the 
+`docker run` command is `<host_name>`, open a web browser and put the following 
+in the location bar: `http://<host_name>:10000/?token=<token_value>` to connect 
+to the Jupyter Lab instance.
 
 If you want a shell prompt as a non-root user inside the container without
 starting a Jupyter server, use the command below, noting that above to start the
