@@ -7,6 +7,7 @@ dedupe
 great-expectations
 herepy
 jinjasql
+jupyter-book
 ptvsd
 pynndescent
 recordlinkage
