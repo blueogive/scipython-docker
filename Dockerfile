@@ -30,6 +30,7 @@ RUN apt-get update --fix-missing \
         gosu \
         libapparmor1 \
         libclang-dev \
+        libssl-dev \
         locales \
         lsb-release \
         make \
