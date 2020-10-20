@@ -28,6 +28,7 @@
 "RPostgres"
 "scales"
 "testthat"
+"tidymodels"
 "tidyverse"
 "tinytex"
 "xtable"

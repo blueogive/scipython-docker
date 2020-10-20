@@ -28,11 +28,12 @@ Additional packages are included for:
 * Database connectivity (sqlalchemy, pyodbc)
 
 In addition, it includes:
-* R (4.0.2)
+* R (4.0.3)
 * RStudio-Server (1.2)
 * Reticulate
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) so you can launch an RStudio session from within Jupyter Notebook
-* and a collection of R packages centered around the [tidyverse](https://tidyverse.org) and literate programming.
+  and a collection of R packages centered around the [tidyverse](https://tidyverse.org), literate programming, and the 
+  [tidymodels](https://tidymodels.org) for model estimation and parameter tuning.
 
 ## Usage
 

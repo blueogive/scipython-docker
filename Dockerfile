@@ -34,6 +34,7 @@ RUN apt-get update --fix-missing \
         locales \
         lsb-release \
         make \
+        openssh-client \
         psmisc \
         sudo \
         wget \
@@ -160,6 +161,7 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
     && mkdir -p /usr/local/lib/R/etc/ \
     && echo "R_LIBS_SITE=${R_LIBS_SITE-'/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
         >> ${HOME}/.Renviron \
+    && chown ${CT_UID}:${CT_GID} ${HOME}/.Renviron \
     && echo \
         "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" \
         >> /usr/local/lib/R/etc/Rprofile.site
@@ -210,7 +212,8 @@ RUN wget -q $RSTUDIO_URL \
     && rm rstudio-server-*-amd64.deb \
     && Rscript -e "install.packages('IRkernel')" \
     && Rscript -e "IRkernel::installspec(user=FALSE)" \
-    && fix-permissions ${HOME}/.local
+    && fix-permissions ${HOME}/.local \
+    && chown ${CT_UID}:${CT_GID} ${HOME}/.local
 
 USER ${CT_USER}
 

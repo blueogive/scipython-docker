@@ -53,6 +53,7 @@ dependencies:
   - conda-env
   - conda-package-handling
   - configurable-http-proxy
+  - confuse
   - coverage
   - cryptography
   - curl
@@ -97,9 +98,11 @@ dependencies:
   - gxx_impl_linux-64
   - gxx_linux-64
   - harfbuzz
+  - htmlmin
   - icu
   - idna
   - idna_ssl
+  - imagehash
   - imagesize
   - importlib-metadata
   - importlib_metadata
@@ -150,6 +153,8 @@ dependencies:
   - libgcc-devel_linux-64
   - libgcc-ng
   - libgfortran-ng
+  - libgfortran5
+  - libglib
   - libgomp
   - libiconv
   - liblapack
@@ -175,6 +180,7 @@ dependencies:
   - libxml2
   - libxslt
   - llvm-openmp
+  - llvmlite
   - lxml
   - lz4-c
   - lzo
@@ -185,6 +191,7 @@ dependencies:
   - matplotlib
   - matplotlib-base
   - mccabe
+  - missingno
   - mistune
   - mkl
   - mkl-service
@@ -201,10 +208,12 @@ dependencies:
   - nbformat
   - ncurses
   - nest-asyncio
+  - networkx
   - nodejs
   - notebook
   - nspr
   - nss
+  - numba
   - numpy
   - oauthlib
   - olefile
@@ -213,6 +222,7 @@ dependencies:
   - packaging
   - pamela
   - pandas
+  - pandas-profiling
   - pandoc
   - pandocfilters
   - pango
@@ -224,6 +234,7 @@ dependencies:
   - pbkdf2
   - pcre
   - pexpect
+  - phik
   - pickleshare
   - pillow
   - pip
@@ -268,6 +279,7 @@ dependencies:
   - python-libarchive-c
   - python_abi
   - pytz
+  - pywavelets
   - pyyaml
   - pyzmq
   - qt
@@ -303,6 +315,7 @@ dependencies:
   - srsly
   - statsmodels
   - sysroot_linux-64
+  - tangled-up-in-unicode
   - terminado
   - testfixtures
   - testpath
@@ -316,9 +329,11 @@ dependencies:
   - tqdm
   - traitlets
   - typed-ast
+  - typing-extensions
   - typing_extensions
   - unixodbc
   - urllib3
+  - visions
   - wasabi
   - watchdog
   - wcwidth
@@ -352,8 +367,8 @@ dependencies:
   - zlib
   - zstd
   - pip:
-    - pyqt5==5.15.1
-    - pyqt5-sip==12.8.1
-    - pyqtchart==5.15.1
-    - pyqtwebengine==5.15.1
+    - pyqt5
+    - pyqt5-sip
+    - pyqtchart
+    - pyqtwebengine
 prefix: /opt/conda
