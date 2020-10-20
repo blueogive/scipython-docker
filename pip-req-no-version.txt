@@ -4,10 +4,12 @@ dagster
 dagster-ge
 dagster-pandas
 dedupe
+format-sql
 great-expectations
 herepy
 jinjasql
 jupyter-book
+pre-commit
 ptvsd
 pynndescent
 recordlinkage
