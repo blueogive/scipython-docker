@@ -239,7 +239,13 @@ RUN source ${HOME}/.bashrc \
     && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
     && fix-permissions ${HOME}/work \
-    && fix-permissions ${HOME}/.local 
+    && fix-permissions ${HOME}/.local \
+    && touch ${HOME}/.gitconfig \
+    && mkdir ${HOME}/.ssh \
+    && chmod 0700 ${HOME}/.ssh \
+    && chown ${CT_UID}:${CT_GID} ${HOME}/.ssh \
+    && chown ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
+    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.0
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${PATH}
 WORKDIR ${HOME}/work
