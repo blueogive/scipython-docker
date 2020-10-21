@@ -247,7 +247,7 @@ RUN source ${HOME}/.bashrc \
     && chown ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
     && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.0
 COPY pip.conf .config/pip/pip.conf
-ENV PATH=${HOME}/.local/bin:${PATH}
+ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH}
 WORKDIR ${HOME}/work
 
 ARG VCS_URL=${VCS_URL}
