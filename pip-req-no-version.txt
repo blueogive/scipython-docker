@@ -1,3 +1,4 @@
+bcpy
 cx-Oracle
 dagit
 dagster
@@ -12,5 +13,6 @@ jupyter-book
 pre-commit
 ptvsd
 pynndescent
+radian
 recordlinkage
 umap-learn
