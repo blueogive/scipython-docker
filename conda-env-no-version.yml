@@ -20,6 +20,7 @@ dependencies:
   - argon2-cffi
   - asn1crypto
   - astroid
+  - astropy
   - async-timeout
   - async_generator
   - atk
@@ -36,6 +37,7 @@ dependencies:
   - blas
   - bleach
   - blinker
+  - bottleneck
   - brotlipy
   - bwidget
   - bzip2
@@ -200,6 +202,7 @@ dependencies:
   - mock
   - more-itertools
   - multidict
+  - multimethod
   - murmurhash
   - mysql-common
   - mysql-libs

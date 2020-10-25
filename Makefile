@@ -12,6 +12,8 @@ BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 TAG_DATE := $(shell date -u +"%Y%m%d")
 DOCKER_HUB_USER := blueogive
 DOCKER_IMG_NAME := scipython-docker
+# Use BuildKit
+export DOCKER_BUILDKIT := 1
 
 docker-prune :
 	@echo Pruning Docker images/containers/networks not in use
@@ -25,6 +27,7 @@ docker-login:
 	@pass hub.docker.com/$(DOCKER_HUB_USER) | docker login -u $(DOCKER_HUB_USER) --password-stdin
 
 docker-build: Dockerfile docker-login
+	@export DOCKER_BUILDKIT
 	@docker build \
 	--build-arg CONDA_ENV_FILE=$(CONDA_ENV_FILE) \
 	--build-arg PIP_REQ_FILE=$(PIP_REQ_FILE) \

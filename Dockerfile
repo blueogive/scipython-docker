@@ -168,12 +168,12 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
 
 COPY rpkgs.csv rpkgs.csv
 COPY Rpkg_install.R Rpkg_install.R
-RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
-    xvfb-run Rscript Rpkg_install.R && \
-    rm rpkgs.csv Rpkg_install.R && \
-    chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
-    chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
-    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX
+RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint \
+    && Rscript Rpkg_install.R \
+    && rm rpkgs.csv Rpkg_install.R \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint \
+    && chown -R ${CT_USER}:${CT_GID} ${HOME}/bin \
+    && chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX
 
 WORKDIR ${HOME}
 

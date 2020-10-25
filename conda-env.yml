@@ -7,7 +7,7 @@ dependencies:
   - _openmp_mutex=4.5=1_llvm
   - _r-mutex=1.0.1=anacondar_1
   - _sysroot_linux-64_curr_repodata_hack=3=ha9d2b57_10
-  - aiohttp=3.6.3=py37h8f50634_0
+  - aiohttp=3.6.2=py37h8f50634_1
   - alabaster=0.7.12=py_0
   - alembic=1.4.3=pyh9f0ad1d_0
   - alsa-lib=1.2.3=h516909a_0
@@ -15,10 +15,11 @@ dependencies:
   - argon2-cffi=20.1.0=py37h8f50634_2
   - asn1crypto=1.4.0=pyh9f0ad1d_0
   - astroid=2.4.2=py37hc8dfbb8_1
+  - astropy=4.0.3=py37h8f50634_0
   - async-timeout=3.0.1=py_1000
   - async_generator=1.10=py_0
-  - atk=2.36.0=2
-  - atk-1.0=2.36.0=h516909a_2
+  - atk=2.36.0=3
+  - atk-1.0=2.36.0=h63f31ab_3
   - atomicwrites=1.4.0=pyh9f0ad1d_0
   - attrs=20.2.0=pyh9f0ad1d_0
   - babel=2.8.0=py_0
@@ -31,6 +32,7 @@ dependencies:
   - blas=2.11=netlib
   - bleach=3.2.1=pyh9f0ad1d_0
   - blinker=1.4=py_1
+  - bottleneck=1.3.2=py37h161383b_2
   - brotlipy=0.7.0=py37hb5d75c8_1001
   - bwidget=1.9.14=0
   - bzip2=1.0.8=h516909a_3
@@ -53,7 +55,7 @@ dependencies:
   - cryptography=3.1.1=py37hff6837a_1
   - curl=7.71.1=he644dc0_8
   - cycler=0.10.0=py_2
-  - cymem=2.0.3=py37h3340039_2
+  - cymem=2.0.3=py37h3340039_3
   - cyrus-sasl=2.1.27=h063b49f_1
   - cython=0.29.21=py37hb892b2f_1
   - cython-blis=0.4.1=py37h8f50634_1
@@ -72,16 +74,16 @@ dependencies:
   - fontconfig=2.13.1=h1056068_1002
   - fonts-anaconda=1=h8fa9717_0
   - freetds=1.1.15=h8385b1f_0
-  - freetype=2.10.3=he06d7ca_0
+  - freetype=2.10.4=he06d7ca_0
   - fribidi=1.0.10=h516909a_0
   - gcc_impl_linux-64=9.3.0=h28f5a38_17
   - gcc_linux-64=9.3.0=h7247604_29
   - gdk-pixbuf=2.38.2=h3f25603_4
-  - gettext=0.19.8.1=hf34092f_1003
+  - gettext=0.19.8.1=hf34092f_1004
   - gfortran_impl_linux-64=9.3.0=h2bb4189_17
   - gfortran_linux-64=9.3.0=ha1c937c_29
   - giflib=5.2.1=h516909a_2
-  - glib=2.66.1=he1b5a44_1
+  - glib=2.66.2=he1b5a44_0
   - glob2=0.7=py_0
   - gmp=6.2.0=he1b5a44_3
   - gobject-introspection=1.66.1=py37h98f159f_2
@@ -101,7 +103,7 @@ dependencies:
   - imagesize=1.2.0=py_0
   - importlib-metadata=2.0.0=py_1
   - importlib_metadata=2.0.0=1
-  - iniconfig=1.1.0=pyh9f0ad1d_0
+  - iniconfig=1.1.1=pyh9f0ad1d_0
   - intel-openmp=2020.2=254
   - ipykernel=5.3.4=py37hc6149b9_1
   - ipython=7.18.1=py37hc6149b9_1
@@ -123,7 +125,7 @@ dependencies:
   - jupyter_contrib_core=0.3.3=py_2
   - jupyter_contrib_nbextensions=0.5.1=py37hc8dfbb8_1
   - jupyter_core=4.6.3=py37hc8dfbb8_2
-  - jupyter_highlight_selected_word=0.2.0=py37hc8dfbb8_1001
+  - jupyter_highlight_selected_word=0.2.0=py37hc8dfbb8_1002
   - jupyter_latex_envs=1.4.6=py37hc8dfbb8_1001
   - jupyter_nbextensions_configurator=0.4.1=py37hc8dfbb8_2
   - jupyterlab=2.2.8=py_0
@@ -149,7 +151,7 @@ dependencies:
   - libgcc-ng=9.3.0=h5dbcf3e_17
   - libgfortran-ng=9.3.0=he4bcb1c_17
   - libgfortran5=9.3.0=he4bcb1c_17
-  - libglib=2.66.1=h0dae87d_1
+  - libglib=2.66.2=h0dae87d_0
   - libgomp=9.3.0=h5dbcf3e_17
   - libiconv=1.16=h516909a_0
   - liblapack=3.8.0=11_h86c2bf4_netlib
@@ -159,7 +161,7 @@ dependencies:
   - libllvm9=9.0.1=he513fc3_1
   - libnghttp2=1.41.0=h8cfc5f6_2
   - libntlm=1.4=h516909a_1002
-  - libopenblas=0.3.11=pthreads_h4812303_1
+  - libopenblas=0.3.10=pthreads_h4812303_5
   - libpng=1.6.37=hed695b0_2
   - libpq=12.3=h5513abc_2
   - libsodium=1.0.18=h516909a_1
@@ -181,7 +183,7 @@ dependencies:
   - lzo=2.10=h516909a_1000
   - make=4.3=hd18ef5c_1
   - mako=1.1.3=pyh9f0ad1d_0
-  - markdown-it-py=0.5.5=py_0
+  - markdown-it-py=0.5.6=py_0
   - markupsafe=1.1.1=py37hb5d75c8_2
   - matplotlib=3.3.2=py37hc8dfbb8_1
   - matplotlib-base=3.3.2=py37hc9afd2a_1
@@ -189,12 +191,13 @@ dependencies:
   - missingno=0.4.2=py_1
   - mistune=0.8.4=py37h8f50634_1002
   - mkl=2020.2=256
-  - mkl-service=2.3.0=py37h8f50634_1
+  - mkl-service=2.3.0=py37h8f50634_2
   - mkl_fft=1.2.0=py37h161383b_1
   - mlxtend=0.17.3=pyh9f0ad1d_0
   - mock=4.0.2=py37hc8dfbb8_1
   - more-itertools=8.5.0=py_0
   - multidict=4.7.5=py37h8f50634_2
+  - multimethod=1.4=py_0
   - murmurhash=1.0.0=py37h3340039_1
   - mysql-common=8.0.21=2
   - mysql-libs=8.0.21=hf3661c5_2
@@ -204,7 +207,7 @@ dependencies:
   - ncurses=6.2=he1b5a44_2
   - nest-asyncio=1.4.1=py_0
   - networkx=2.5=py_0
-  - nodejs=14.13.1=h568c755_0
+  - nodejs=14.14.0=h568c755_0
   - notebook=6.1.4=py37hc8dfbb8_1
   - nspr=4.29=he1b5a44_1
   - nss=3.58=h27285de_1
@@ -216,8 +219,8 @@ dependencies:
   - openssl=1.1.1h=h516909a_0
   - packaging=20.4=pyh9f0ad1d_0
   - pamela=1.0.0=py_0
-  - pandas=1.1.3=py37h9fdb41a_2
-  - pandas-profiling=2.9.0=pyh9f0ad1d_0
+  - pandas=1.1.3=py37hb33c840_2
+  - pandas-profiling=2.8.0=py_0
   - pandoc=2.11.0.2=hd18ef5c_0
   - pandocfilters=1.4.2=py_1
   - pango=1.42.4=h80147aa_5
@@ -231,13 +234,13 @@ dependencies:
   - pexpect=4.8.0=pyh9f0ad1d_2
   - phik=0.10.0=py_0
   - pickleshare=0.7.5=py_1003
-  - pillow=8.0.0=py37h718be6c_0
+  - pillow=8.0.1=py37h718be6c_0
   - pip=20.2.4=py_0
   - pixman=0.38.0=h516909a_1003
-  - pkginfo=1.5.0.1=py_0
+  - pkginfo=1.6.0=pyh9f0ad1d_0
   - plac=0.9.6=py_1
-  - pluggy=0.13.1=py37hc8dfbb8_3
-  - preshed=3.0.2=py37h3340039_3
+  - pluggy=0.13.1=py37he5f6b98_3
+  - preshed=3.0.2=py37h3340039_4
   - proj4=6.1.1=hc80f0dc_1
   - prometheus_client=0.8.0=pyh9f0ad1d_0
   - prompt-toolkit=3.0.8=py_0
@@ -245,7 +248,7 @@ dependencies:
   - psutil=5.7.2=py37hb5d75c8_1
   - psycopg2=2.8.6=py37hb09aad4_1
   - pthread-stubs=0.4=h14c3975_1001
-  - ptvsd=4.3.2=py37h8f50634_2
+  - ptvsd=4.3.2=py37h8f50634_3
   - ptyprocess=0.6.0=py_1001
   - py=1.9.0=pyh9f0ad1d_0
   - py-lief=0.10.1=py37hb892b2f_2
@@ -253,7 +256,7 @@ dependencies:
   - pycosat=0.6.3=py37hb5d75c8_1005
   - pycparser=2.20=pyh9f0ad1d_2
   - pycrypto=2.6.1=py37hb5d75c8_1005
-  - pycurl=7.43.0.5=py37h21fb010_3
+  - pycurl=7.43.0.6=py37h21fb010_0
   - pydocstyle=5.1.1=py_0
   - pyflakes=2.2.0=pyh9f0ad1d_0
   - pygments=2.7.1=py_0
@@ -266,7 +269,7 @@ dependencies:
   - pyproj=2.3.1=py37h2fd02e8_0
   - pyrsistent=0.17.3=py37h8f50634_1
   - pysocks=1.7.1=py37he5f6b98_2
-  - pytest=6.1.1=py37hc8dfbb8_1
+  - pytest=6.1.1=py37he5f6b98_1
   - python=3.7.8=h6f2ec95_1_cpython
   - python-dateutil=2.8.1=py_0
   - python-dotenv=0.14.0=pyh9f0ad1d_0
@@ -328,7 +331,7 @@ dependencies:
   - typing_extensions=3.7.4.3=py_0
   - unixodbc=2.3.9=h0e019cf_0
   - urllib3=1.25.11=py_0
-  - visions=0.5.0=pyh9f0ad1d_0
+  - visions=0.6.4=pyh9f0ad1d_0
   - wasabi=0.8.0=pyh9f0ad1d_0
   - watchdog=0.10.3=py37hc8dfbb8_2
   - wcwidth=0.2.5=pyh9f0ad1d_2
