@@ -27,7 +27,6 @@ docker-login:
 	@pass hub.docker.com/$(DOCKER_HUB_USER) | docker login -u $(DOCKER_HUB_USER) --password-stdin
 
 docker-build: Dockerfile docker-login
-	@export DOCKER_BUILDKIT
 	@docker build \
 	--build-arg CONDA_ENV_FILE=$(CONDA_ENV_FILE) \
 	--build-arg PIP_REQ_FILE=$(PIP_REQ_FILE) \
