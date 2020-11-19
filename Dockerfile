@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:focal-20200916
+FROM ubuntu:bionic-20200713
 
 USER root
 
@@ -126,7 +126,8 @@ RUN unzip fonts.zip \
     && rm -rf ${FONT_LOCAL}/adobe-fonts/source-code-pro/WOFF \
     && fc-cache -f -v "${FONT_LOCAL}"
 
-RUN wget --quiet \
+RUN umask 0002 && \
+    wget --quiet \
     https://repo.anaconda.com/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh \
     -O /root/miniconda.sh && \
     if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "d63adf39f2c220950a063e0529d4ff74" ]; then \
@@ -147,7 +148,7 @@ ENV HOME=/home/${CT_USER}
 
 WORKDIR ${HOME}
 
-RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/" > \
     /etc/apt/sources.list.d/cran40.list \
     && apt-key adv --keyserver keyserver.ubuntu.com \
         --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
@@ -168,8 +169,9 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
 
 COPY rpkgs.csv rpkgs.csv
 COPY Rpkg_install.R Rpkg_install.R
-RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
-    xvfb-run Rscript Rpkg_install.R && \
+RUN umask 0002 && \
+    mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
+    Rscript Rpkg_install.R && \
     rm rpkgs.csv Rpkg_install.R && \
     chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
@@ -184,7 +186,8 @@ USER ${CT_USER}
 
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
-RUN /opt/conda/bin/conda update -n base -c defaults conda \
+RUN umask 0002 \
+    && /opt/conda/bin/conda update -n base -c defaults conda \
     && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/conda install conda-build -y \
     && /opt/conda/bin/conda build purge-all \
@@ -195,7 +198,8 @@ RUN /opt/conda/bin/conda update -n base -c defaults conda \
 
 RUN mkdir -p ${HOME}/.jupyter/lab
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
-RUN jupyter labextension install @jupyterlab/hub-extension \
+RUN umask 0002 \
+    && jupyter labextension install @jupyterlab/hub-extension \
     && npm cache clean --force \
     && jupyter notebook --generate-config \
     && jupyter lab build \
@@ -217,13 +221,15 @@ RUN wget -q $RSTUDIO_URL \
 
 USER ${CT_USER}
 
-RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
+RUN umask 0002 \
+    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
     mkdir ${HOME}/work
 SHELL [ "/bin/bash", "--login", "-c"]
 ARG PIP_REQ_FILE=${PIP_REQ_FILE}
 COPY ${PIP_REQ_FILE} ${PIP_REQ_FILE}
-RUN source ${HOME}/.bashrc \
+RUN umask 0002 \
+    && source ${HOME}/.bashrc \
     && conda activate base \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
@@ -274,6 +280,12 @@ COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
-RUN fix-permissions /etc/jupyter/
+COPY docker-entrypoint /usr/local/bin
+RUN fix-permissions /etc/jupyter/ \
+    && chmod 0755 /usr/local/bin/docker-entrypoint
 
 CMD [ "/bin/bash" ]
+
+USER ${CT_USER}
+
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint" ]

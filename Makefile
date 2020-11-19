@@ -2,8 +2,8 @@
 
 # To build an image with the latest package versions, change the value of
 # CONDA_ENV_FILE to  conda-env-no-version.yml
-CONDA_ENV_FILE := conda-env.yml
-# CONDA_ENV_FILE := conda-env-no-version.yml
+# CONDA_ENV_FILE := conda-env.yml
+CONDA_ENV_FILE := conda-env-no-version.yml
 PIP_REQ_FILE := pip-req.txt
 # PIP_REQ_FILE := pip-req-no-version.txt
 VCS_URL := $(shell git remote get-url --push gh)
