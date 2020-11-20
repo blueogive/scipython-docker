@@ -3,6 +3,7 @@ cx-Oracle
 dedupe
 format-sql
 great-expectations
+jellyfish
 jinjasql
 jupyter-book
 pre-commit

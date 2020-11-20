@@ -9,10 +9,12 @@ channels:
   - defaults
 dependencies:
   - _libgcc_mutex
+  - _openmp_mutex
   - aiohttp
   - alabaster
   - argon2-cffi
   - astroid
+  - astropy
   - async-timeout
   - async_generator
   - attrs
@@ -20,9 +22,10 @@ dependencies:
   - babel
   - backcall
   - backports
-  - backports.functools_lru_cache
+  - backports.functools_lru_cache=1.6.1=py_0
   - beautifulsoup4
   - bleach
+  - bottleneck
   - brotlipy
   - bzip2
   - ca-certificates
@@ -49,6 +52,7 @@ dependencies:
   - fontconfig
   - freetds
   - freetype
+  - gettext
   - glib
   - glob2
   - gst-plugins-base
@@ -90,34 +94,43 @@ dependencies:
   - jupyterlab_server
   - jupytext
   - kiwisolver
+  - krb5
   - lazy-object-proxy
   - lcms2
   - ld_impl_linux-64
   - libarchive
   - libblas
   - libcblas
+  - libclang
   - libedit
+  - libevent
   - libffi
   - libgcc-ng
   - libgfortran-ng
   - libgfortran4
+  - libglib
   - libiconv
   - liblapack
   - liblief
   - libllvm10
   - libopenblas
   - libpng
+  - libpq
   - libsodium
   - libstdcxx-ng
   - libtiff
   - libuuid
+  - libuv
   - libwebp-base
   - libxcb
+  - libxkbcommon
   - libxml2
   - libxslt
+  - llvm-openmp
   - llvmlite
   - lxml
   - lz4-c
+  - lzo
   - make
   - markdown-it-py
   - markupsafe
@@ -132,7 +145,11 @@ dependencies:
   - mlxtend
   - more-itertools
   - multidict
+  - multimethod
   - mypy
+  - mypy_extensions
+  - mysql-common
+  - mysql-libs
   - nbclient
   - nbconvert
   - nbformat
@@ -141,6 +158,8 @@ dependencies:
   - networkx
   - nodejs
   - notebook
+  - nspr
+  - nss
   - numba
   - numpy
   - olefile
@@ -186,7 +205,7 @@ dependencies:
   - pyrsistent
   - pysocks
   - pytest
-  - python
+  - python==3.8.6=h852b56e_0_cpython
   - python-dateutil
   - python-dotenv
   - python-libarchive-c
@@ -232,6 +251,7 @@ dependencies:
   - tornado
   - tqdm
   - traitlets
+  - typed-ast
   - typing-extensions
   - typing_extensions
   - unixodbc
@@ -251,4 +271,8 @@ dependencies:
   - zipp
   - zlib
   - zstd
+  - pip:
+    - pyqt5-sip==4.19.18
+    - pyqtchart==5.12
+    - pyqtwebengine==5.12.1
 prefix: /opt/conda
