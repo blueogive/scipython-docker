@@ -228,24 +228,26 @@ RUN umask 0002 \
 SHELL [ "/bin/bash", "--login", "-c"]
 ARG PIP_REQ_FILE=${PIP_REQ_FILE}
 COPY ${PIP_REQ_FILE} ${PIP_REQ_FILE}
+
+USER root
+
 RUN umask 0002 \
     && source ${HOME}/.bashrc \
     && conda activate base \
     && git clone https://github.com/blueogive/pyncrypt.git \
-    && pip install --user --no-cache-dir --disable-pip-version-check pyncrypt/ \
+    && pip install --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt \
     && git clone https://github.com/blueogive/py_qualtrics_api.git \
-    && pip install --user --no-cache-dir --disable-pip-version-check py_qualtrics_api/ \
+    && pip install --no-cache-dir --disable-pip-version-check py_qualtrics_api/ \
     && rm -rf py_qualtrics_api \
     && git clone https://github.com/jupyterhub/jupyter-rsession-proxy.git \
-    && pip install --user --no-cache-dir --disable-pip-version-check jupyter-rsession-proxy/ \
+    && pip install --no-cache-dir --disable-pip-version-check jupyter-rsession-proxy/ \
     && rm -rf jupyter-rsession-proxy \
-    && pip install --user --no-cache-dir --disable-pip-version-check \
+    && pip install --no-cache-dir --disable-pip-version-check \
       -r ${PIP_REQ_FILE} \
     && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
     && fix-permissions ${HOME}/work \
-    && fix-permissions ${HOME}/.local \
     && touch ${HOME}/.gitconfig \
     && mkdir ${HOME}/.ssh \
     && chmod 0700 ${HOME}/.ssh \
@@ -270,7 +272,7 @@ LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
     org.label-schema.build-date=${BUILD_DATE} \
     maintainer="Mark Coggeshall <mark.coggeshall@gmail.com>"
 
-USER root
+# USER root
 
 # jupyter port
 EXPOSE 8888
