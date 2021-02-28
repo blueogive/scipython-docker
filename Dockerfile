@@ -14,8 +14,8 @@ FROM ubuntu:bionic-20200713
 
 USER root
 
-ENV RSTUDIO_VERSION=1.2.5033 \
-    PANDOC_TEMPLATES_VERSION=2.10.1 \
+ENV RSTUDIO_VERSION=1.4.1106 \
+    PANDOC_TEMPLATES_VERSION=2.11.4 \
     DEBIAN_FRONTEND=noninteractive
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"
 
@@ -126,16 +126,6 @@ RUN unzip fonts.zip \
     && rm -rf ${FONT_LOCAL}/adobe-fonts/source-code-pro/WOFF \
     && fc-cache -f -v "${FONT_LOCAL}"
 
-RUN umask 0002 && \
-    wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh \
-    -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "d63adf39f2c220950a063e0529d4ff74" ]; then \
-        /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
-    rm /root/miniconda.sh && \
-    /opt/conda/bin/conda clean -atipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
-
 # Add a script that we will use to correct permissions after running certain commands
 ADD fix-permissions /usr/local/bin/fix-permissions
 
@@ -179,21 +169,40 @@ RUN umask 0002 && \
 
 WORKDIR ${HOME}
 
+RUN umask 0002 && \
+    wget --quiet \
+    https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Linux-x86_64.sh \
+    -O /root/miniconda.sh && \
+    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "122c8c9beb51e124ab32a0fa6426c656" ]; then \
+        /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
+    rm /root/miniconda.sh && \
+    /opt/conda/bin/conda clean -atipsy && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+
 RUN fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
 
 USER ${CT_USER}
 
+SHELL [ "/bin/bash", "--login", "-c"]
+
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
+
 RUN umask 0002 \
-    && /opt/conda/bin/conda update -n base -c defaults conda \
-    && /opt/conda/bin/conda env update -n base --file ${CONDA_ENV_FILE} \
-    && /opt/conda/bin/conda install conda-build -y \
-    && /opt/conda/bin/conda build purge-all \
-    && /opt/conda/bin/conda config --add channels conda-forge \
-    && /opt/conda/bin/conda config --set channel_priority strict \
-    && /opt/conda/bin/conda clean -atipsy \
+    # Left overs from my experimentation with micromamba. It looks promising,
+    # but it seems it is not yet able to read conda environment (YAML) files.
+    # && wget -qO- https://micromamba.snakepit.net/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
+    # && ${HOME}/bin/micromamba shell init -s bash -p ${HOME}/micromamba 
+    # && source ${HOME}/.bashrc 
+    # && ${HOME}/bin/micromamba create -n base  --file ${CONDA_ENV_FILE} \
+    #       -c defaults conda conda-forge 
+    # && ${HOME}/bin/micromamba clean -atipy \
+    && /opt/conda/bin/conda install --yes -n base -c conda-forge mamba \
+    && /opt/conda/bin/mamba env update -n base --file ${CONDA_ENV_FILE} \
+    && /opt/conda/bin/mamba config --add channels conda-forge \
+    && /opt/conda/bin/mamba config --set channel_priority strict \
+    && /opt/conda/bin/mamba clean -atipy \
     && rm ${CONDA_ENV_FILE}
 
 RUN mkdir -p ${HOME}/.jupyter/lab
@@ -225,9 +234,6 @@ RUN umask 0002 \
     && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
     echo "conda activate base" >> ${HOME}/.bashrc && \
     mkdir ${HOME}/work
-SHELL [ "/bin/bash", "--login", "-c"]
-ARG PIP_REQ_FILE=${PIP_REQ_FILE}
-COPY ${PIP_REQ_FILE} ${PIP_REQ_FILE}
 
 USER root
 
@@ -237,15 +243,9 @@ RUN umask 0002 \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt \
-    && git clone https://github.com/blueogive/py_qualtrics_api.git \
-    && pip install --no-cache-dir --disable-pip-version-check py_qualtrics_api/ \
-    && rm -rf py_qualtrics_api \
     && git clone https://github.com/jupyterhub/jupyter-rsession-proxy.git \
     && pip install --no-cache-dir --disable-pip-version-check jupyter-rsession-proxy/ \
     && rm -rf jupyter-rsession-proxy \
-    && pip install --no-cache-dir --disable-pip-version-check \
-      -r ${PIP_REQ_FILE} \
-    && rm ${PIP_REQ_FILE} \
     && mkdir -p .config/pip \
     && fix-permissions ${HOME}/work \
     && touch ${HOME}/.gitconfig \
@@ -255,8 +255,8 @@ RUN umask 0002 \
     && chown ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
     && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.0
 COPY pip.conf .config/pip/pip.conf
-ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH}
-WORKDIR ${HOME}/work
+ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
+    RSESSION_PROXY_RSTUDIO_1_4=true
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
@@ -286,8 +286,7 @@ COPY docker-entrypoint /usr/local/bin
 RUN fix-permissions /etc/jupyter/ \
     && chmod 0755 /usr/local/bin/docker-entrypoint
 
-CMD [ "/bin/bash" ]
-
 USER ${CT_USER}
-
-ENTRYPOINT [ "/usr/local/bin/docker-entrypoint" ]
+WORKDIR ${HOME}/work
+CMD [ "/bin/bash" ]
+# ENTRYPOINT [ "/usr/local/bin/start-notebook.sh", "--notebook-dir", "." ]

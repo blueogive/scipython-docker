@@ -12,6 +12,7 @@ dependencies:
   - _openmp_mutex
   - aiohttp
   - alabaster
+  - anyio
   - argon2-cffi
   - astroid
   - astropy
@@ -22,7 +23,7 @@ dependencies:
   - babel
   - backcall
   - backports
-  - backports.functools_lru_cache=1.6.1=py_0
+  - backports.functools_lru_cache
   - beautifulsoup4
   - bleach
   - bottleneck
@@ -33,6 +34,9 @@ dependencies:
   - cffi
   - chardet
   - click
+  - click-completion
+  - click-log
+  - colorama
   - conda
   - conda-build
   - conda-package-handling
@@ -53,7 +57,10 @@ dependencies:
   - freetds
   - freetype
   - gettext
+  - gitdb
+  - gitpython
   - glib
+  - glib-tools
   - glob2
   - gst-plugins-base
   - gstreamer
@@ -69,6 +76,7 @@ dependencies:
   - ipykernel
   - ipython
   - ipython_genutils
+  - ipython-sql
   - ipywidgets
   - isort
   - jedi
@@ -79,6 +87,8 @@ dependencies:
   - json5
   - jsonschema
   - jupyter
+  - jupyter-book
+  - jupyter-packaging
   - jupyter-rsession-proxy
   - jupyter-server-proxy
   - jupyter_client
@@ -89,12 +99,14 @@ dependencies:
   - jupyter_highlight_selected_word
   - jupyter_latex_envs
   - jupyter_nbextensions_configurator
+  - jupyter_server
   - jupyterlab
   - jupyterlab_pygments
   - jupyterlab_server
-  - jupytext
+  - jupyterlab_widgets
   - kiwisolver
   - krb5
+  - latexcodec
   - lazy-object-proxy
   - lcms2
   - ld_impl_linux-64
@@ -113,6 +125,7 @@ dependencies:
   - liblapack
   - liblief
   - libllvm10
+  - libllvm11
   - libopenblas
   - libpng
   - libpq
@@ -137,6 +150,7 @@ dependencies:
   - matplotlib
   - matplotlib-base
   - mccabe
+  - mdit-py-plugins
   - missingno
   - mistune
   - mkl
@@ -150,8 +164,10 @@ dependencies:
   - mypy_extensions
   - mysql-common
   - mysql-libs
+  - nbclassic
   - nbclient
-  - nbconvert
+  - nbconvert=5.6.1  # Pin this as version >=6 makes breaking changes
+  - nbdime
   - nbformat
   - ncurses
   - nest-asyncio
@@ -161,9 +177,9 @@ dependencies:
   - nspr
   - nss
   - numba
-  - numpy
   - olefile
   - openssl
+  - oset
   - packaging
   - pandas
   - pandas-profiling
@@ -190,10 +206,14 @@ dependencies:
   - ptyprocess
   - py
   - py-lief
+  - pybtex
+  - pybtex-docutils
   - pycodestyle
   - pycosat
   - pycparser
+  - pydata-sphinx-theme
   - pydocstyle
+  - pyerfa
   - pyflakes
   - pygments
   - pylint
@@ -202,10 +222,14 @@ dependencies:
   - pyopenssl
   - pyparsing
   - pyqt
+  - pyqt-impl
+  - pyqt5-sip
+  - pyqtchart
+  - pyqtwebengine
   - pyrsistent
   - pysocks
   - pytest
-  - python==3.8.6=h852b56e_0_cpython
+  - python
   - python-dateutil
   - python-dotenv
   - python-libarchive-c
@@ -227,12 +251,18 @@ dependencies:
   - seaborn-base
   - send2trash
   - setuptools
+  - shellingham
   - simpervisor
   - sip
   - six
+  - smmap
+  - sniffio
   - snowballstemmer
   - soupsieve
   - sphinx
+  - sphinx-comments
+  - sphinx-copybutton
+  - sphinx-panels
   - sphinxcontrib-applehelp
   - sphinxcontrib-devhelp
   - sphinxcontrib-htmlhelp
@@ -272,7 +302,16 @@ dependencies:
   - zlib
   - zstd
   - pip:
-    - pyqt5-sip==4.19.18
-    - pyqtchart==5.12
-    - pyqtwebengine==5.12.1
+    - bcpy
+    - cx-Oracle
+    - dedupe
+    - format-sql
+    # - great-expectations
+    - jellyfish
+    - jinjasql
+    - pre-commit
+    - ptvsd
+    - pynndescent
+    - radian
+    - umap-learn
 prefix: /opt/conda

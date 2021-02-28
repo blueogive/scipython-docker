@@ -5,7 +5,9 @@ This repo contains a `Dockerfile` to build a foundational scientific Python
 [Docker Hub](https://hub.docker.com/blueogive/scipython-docker). The
 foundation of the image is the [Miniconda](https://conda.io/miniconda.html)
 environment management system developed by
-[Anaconda, Inc](https://www.anaconda.com/). Core packages included in the
+[Anaconda, Inc](https://www.anaconda.com/). Miniconda is augmented by the 
+rapidly maturing [Mamba](https://github.com/mamba-org/mamba) package manager,
+which enables much faster builds than `conda`. Core packages included in the
 image include:
 * CPython (3.8)
 * Numpy
@@ -27,8 +29,8 @@ Additional packages are included for:
 * Database connectivity (sqlalchemy, pyodbc)
 
 In addition, it includes:
-* R (4.0.3)
-* RStudio-Server (1.2)
+* R (4.0.4)
+* RStudio-Server (1.4)
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) so you can launch an RStudio session from within Jupyter Notebook
   and a collection of R packages centered around the [tidyverse](https://tidyverse.org), and literate programming.
 
@@ -42,14 +44,18 @@ Python environment:
 docker run -it --rm -v $(pwd):/home/docker/work blueogive/scipython-docker:latest
 ```
 
-You will be running as root within the container, but the image includes the
-[gosu](https://github.com/tianon/gosu) utility, which allows you to conveniently execute commands as a less privileged user:
+By default, you will be running as the (unprivileged) `docker` user within the 
+container. The image includes the [gosu](https://github.com/tianon/gosu) 
+utility, which allows you to conveniently execute commands as a less privileged user:
 
 ```bash
 gosu 1000:100 python myscript.py
 ```
 
-I borrowed much of the apparatus for enabling the launch of Jupyter Notebook/Lab server processes from the [Jupyter Docker Stacks](https://github.com/jupyter/docker-stacks/), so the commands to start a Jupyter server are similar to those they suggest.
+I borrowed much of the apparatus for enabling the launch of Jupyter 
+Notebook/Lab server processes from the 
+[Jupyter Docker Stacks](https://github.com/jupyter/docker-stacks/), so the 
+commands to start a Jupyter server are similar to those they suggest.
 
 ## Jupyter Notebook
 
@@ -87,9 +93,9 @@ docker run -it --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython
 
 Pressing `CTRL-d` within the container will cause it to terminate.
 
-## RStudio
+## RStudio Server
 
-To launch RStudio(-Server), start the container using either the Jupyter Lab or
+To launch RStudio Server, start the container using either the Jupyter Lab or
 Jupyter Notebook commands above. Then, connect to the Jupyter server using your
 browser. If you started Jupyter Lab, use the menu to 'Launch Classic Notebook'.
 If you started a Jupyter Notebook, skip that step. Within the classic Notebook,
