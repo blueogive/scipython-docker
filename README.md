@@ -3,12 +3,9 @@
 This repo contains a `Dockerfile` to build a foundational scientific Python
 [Docker](https://www.docker.com) image. Built images are hosted on
 [Docker Hub](https://hub.docker.com/blueogive/scipython-docker). The
-foundation of the image is the [Miniconda](https://conda.io/miniconda.html)
-environment management system developed by
-[Anaconda, Inc](https://www.anaconda.com/). Miniconda is augmented by the 
-rapidly maturing [Mamba](https://github.com/mamba-org/mamba) package manager,
-which enables much faster builds than `conda`. Core packages included in the
-image include:
+foundation of the image is the [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
+environment management system developed by the Conda-Forge community. 
+Core packages included in the image include:
 * CPython (3.8)
 * Numpy
 * SciPy

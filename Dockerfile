@@ -171,15 +171,14 @@ WORKDIR ${HOME}
 
 RUN umask 0002 && \
     wget --quiet \
-    https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Linux-x86_64.sh \
-    -O /root/miniconda.sh && \
-    if [ "`md5sum /root/miniconda.sh | cut -d\  -f1`" = "122c8c9beb51e124ab32a0fa6426c656" ]; then \
-        /bin/bash /root/miniconda.sh -b -p /opt/conda; fi && \
-    rm /root/miniconda.sh && \
+    https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
+    -O /root/mambaforge.sh && \
+    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "4ff3520f8d99d64d355c45f8b08314cd" ]; then \
+        /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
+    rm /root/mambaforge.sh && \
     /opt/conda/bin/conda clean -atipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
-
-RUN fix-permissions ${CONDA_DIR} \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
 
 USER ${CT_USER}
@@ -198,7 +197,6 @@ RUN umask 0002 \
     # && ${HOME}/bin/micromamba create -n base  --file ${CONDA_ENV_FILE} \
     #       -c defaults conda conda-forge 
     # && ${HOME}/bin/micromamba clean -atipy \
-    && /opt/conda/bin/conda install --yes -n base -c conda-forge mamba \
     && /opt/conda/bin/mamba env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/mamba config --add channels conda-forge \
     && /opt/conda/bin/mamba config --set channel_priority strict \
@@ -264,15 +262,13 @@ ARG BUILD_DATE=${BUILD_DATE}
 
 # Add image metadata
 LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
-    org.label-schema.vendor="Anaconda, Inc. and Python Foundation, Dockerfile provided by Mark Coggeshall" \
+    org.label-schema.vendor="Conda-forge Community and Python Foundation, Dockerfile provided by Mark Coggeshall" \
     org.label-schema.name="Scientific Python Foundation" \
-    org.label-schema.description="Docker image including a foundational scientific Python stack based on Miniconda and Python 3." \
+    org.label-schema.description="Docker image including a foundational scientific Python stack based on Mambaforge and Python 3." \
     org.label-schema.vcs-url=${VCS_URL} \
     org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE} \
     maintainer="Mark Coggeshall <mark.coggeshall@gmail.com>"
-
-# USER root
 
 # jupyter port
 EXPOSE 8888
@@ -289,4 +285,3 @@ RUN fix-permissions /etc/jupyter/ \
 USER ${CT_USER}
 WORKDIR ${HOME}/work
 CMD [ "/bin/bash" ]
-# ENTRYPOINT [ "/usr/local/bin/start-notebook.sh", "--notebook-dir", "." ]
