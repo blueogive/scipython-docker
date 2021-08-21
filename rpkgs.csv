@@ -2,6 +2,7 @@
 "blogdown"
 "bookdown"
 "devtools"
+"languageserver"
 "odbc"
 "packrat"
 "pacman"

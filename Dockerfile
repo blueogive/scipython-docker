@@ -10,13 +10,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:bionic-20200713
+FROM ubuntu:focal-20210723
 
 USER root
 
-ENV RSTUDIO_VERSION=1.4.1106 \
-    PANDOC_TEMPLATES_VERSION=2.11.4 \
-    DEBIAN_FRONTEND=noninteractive
+ENV RSTUDIO_VERSION=1.4.1717 \
+    PANDOC_TEMPLATES_VERSION=2.14.2 \
+    DEBIAN_FRONTEND=noninteractive \
+    LC_ALL="en_US.UTF-8" \
+    LANG="en_US.UTF-8" \
+    LANGUAGE="en_US.UTF-8"
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"
 
 RUN apt-get update --fix-missing \
@@ -67,7 +70,10 @@ RUN apt-get update --fix-missing \
         libxt6 \
         libsm6 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen ${LANG} \
+    && dpkg-reconfigure locales \
+    && update-locale LANG=${LANG}
 
 ## Install pandoc-templates.
 RUN mkdir -p /opt/pandoc/templates \
@@ -96,35 +102,13 @@ RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && rm /etc/apt/sources.list.d/mssql-release.list
 
 ## Set environment variables
-ENV LC_ALL="en_US.UTF-8" \
-    LANG="en_US.UTF-8" \
-    LANGUAGE="en_US.UTF-8" \
-    PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
+ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
     CT_GID=100 \
     CT_FMODE=0775 \
-    CONDA_DIR=/opt/conda \
-    FONT_LOCAL=/usr/local/share/fonts
-
-COPY fonts.zip ${FONT_LOCAL}
-
-WORKDIR ${FONT_LOCAL}
-
-## Setup the locale
-RUN unzip fonts.zip \
-    && rm fonts.zip \
-    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-    && locale-gen en_US.utf8 \
-    && /usr/sbin/update-locale LANG=en_US.UTF-8 \
-    && git clone --branch release --depth 1 \
-    'https://github.com/adobe-fonts/source-code-pro.git' \
-    "${FONT_LOCAL}/adobe-fonts/source-code-pro" \
-    # XeTeX gets hung up by these WOFF files, if they are present.
-    # Looks like a bug.
-    && rm -rf ${FONT_LOCAL}/adobe-fonts/source-code-pro/WOFF \
-    && fc-cache -f -v "${FONT_LOCAL}"
+    CONDA_DIR=/opt/conda
 
 # Add a script that we will use to correct permissions after running certain commands
 ADD fix-permissions /usr/local/bin/fix-permissions
@@ -138,7 +122,7 @@ ENV HOME=/home/${CT_USER}
 
 WORKDIR ${HOME}
 
-RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/" > \
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
     /etc/apt/sources.list.d/cran40.list \
     && apt-key adv --keyserver keyserver.ubuntu.com \
         --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
@@ -173,10 +157,10 @@ RUN umask 0002 && \
     wget --quiet \
     https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
     -O /root/mambaforge.sh && \
-    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "4ff3520f8d99d64d355c45f8b08314cd" ]; then \
+    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "378da13349a6eb0d89900edbb2c39a32" ]; then \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
-    /opt/conda/bin/conda clean -atipsy && \
+    /opt/conda/bin/mamba clean -atipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
@@ -192,10 +176,10 @@ RUN umask 0002 \
     # Left overs from my experimentation with micromamba. It looks promising,
     # but it seems it is not yet able to read conda environment (YAML) files.
     # && wget -qO- https://micromamba.snakepit.net/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
-    # && ${HOME}/bin/micromamba shell init -s bash -p ${HOME}/micromamba 
-    # && source ${HOME}/.bashrc 
+    # && ${HOME}/bin/micromamba shell init -s bash -p ${HOME}/micromamba
+    # && source ${HOME}/.bashrc
     # && ${HOME}/bin/micromamba create -n base  --file ${CONDA_ENV_FILE} \
-    #       -c defaults conda conda-forge 
+    #       -c defaults conda conda-forge
     # && ${HOME}/bin/micromamba clean -atipy \
     && /opt/conda/bin/mamba env update -n base --file ${CONDA_ENV_FILE} \
     && /opt/conda/bin/mamba config --add channels conda-forge \
@@ -230,7 +214,7 @@ USER ${CT_USER}
 
 RUN umask 0002 \
     && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
-    echo "conda activate base" >> ${HOME}/.bashrc && \
+    echo "mamba activate base" >> ${HOME}/.bashrc && \
     mkdir ${HOME}/work
 
 USER root
@@ -251,10 +235,11 @@ RUN umask 0002 \
     && chmod 0700 ${HOME}/.ssh \
     && chown ${CT_UID}:${CT_GID} ${HOME}/.ssh \
     && chown ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
-    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.0
+    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.1
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
-    RSESSION_PROXY_RSTUDIO_1_4=true
+    RSESSION_PROXY_RSTUDIO_1_4=true \
+    R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.1
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
@@ -278,10 +263,9 @@ COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
-COPY docker-entrypoint /usr/local/bin
-RUN fix-permissions /etc/jupyter/ \
-    && chmod 0755 /usr/local/bin/docker-entrypoint
+RUN fix-permissions /etc/jupyter/
 
 USER ${CT_USER}
 WORKDIR ${HOME}/work
+SHELL [ "/bin/bash", "--login", "-c" ]
 CMD [ "/bin/bash" ]

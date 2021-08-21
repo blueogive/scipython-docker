@@ -25,6 +25,7 @@ dependencies:
   - backports
   - backports.functools_lru_cache
   - beautifulsoup4
+  - black
   - bleach
   - bottleneck
   - brotlipy
@@ -53,6 +54,7 @@ dependencies:
   - expat
   - filelock
   - flake8
+  - flake8-isort
   - fontconfig
   - freetds
   - freetype
@@ -166,7 +168,7 @@ dependencies:
   - mysql-libs
   - nbclassic
   - nbclient
-  - nbconvert=5.6.1  # Pin this as version >=6 makes breaking changes
+  - nbconvert
   - nbdime
   - nbformat
   - ncurses
@@ -302,16 +304,17 @@ dependencies:
   - zlib
   - zstd
   - pip:
-    - bcpy
     - cx-Oracle
     - dedupe
+    - deepmatcher
     - format-sql
-    # - great-expectations
+    - great-expectations
     - jellyfish
     - jinjasql
     - pre-commit
     - ptvsd
     - pynndescent
+    - py_entitymatching
     - radian
     - umap-learn
 prefix: /opt/conda
