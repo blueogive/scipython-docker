@@ -213,15 +213,14 @@ RUN wget -q $RSTUDIO_URL \
 USER ${CT_USER}
 
 RUN umask 0002 \
-    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc && \
-    echo "mamba activate base" >> ${HOME}/.bashrc && \
-    mkdir ${HOME}/work
+    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc \
+    && echo "conda activate base" >> ${HOME}/.bashrc \
+    && mkdir ${HOME}/work
 
 USER root
 
 RUN umask 0002 \
     && source ${HOME}/.bashrc \
-    && conda activate base \
     && git clone https://github.com/blueogive/pyncrypt.git \
     && pip install --no-cache-dir --disable-pip-version-check pyncrypt/ \
     && rm -rf pyncrypt \
