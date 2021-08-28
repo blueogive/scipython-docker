@@ -155,9 +155,9 @@ WORKDIR ${HOME}
 
 RUN umask 0002 && \
     wget --quiet \
-    https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
+    https://github.com/conda-forge/miniforge/releases/download/4.10.3-5/Mambaforge-4.10.3-5-Linux-x86_64.sh \
     -O /root/mambaforge.sh && \
-    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "378da13349a6eb0d89900edbb2c39a32" ]; then \
+    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "2aff37852fa373bbf2ff897f757cf66f" ]; then \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
     /opt/conda/bin/mamba clean -atipsy && \
@@ -266,5 +266,4 @@ RUN fix-permissions /etc/jupyter/
 
 USER ${CT_USER}
 WORKDIR ${HOME}/work
-SHELL [ "/bin/bash", "--login", "-c" ]
 CMD [ "/bin/bash" ]

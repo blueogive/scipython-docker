@@ -10,6 +10,7 @@ channels:
 dependencies:
   - _libgcc_mutex
   - _openmp_mutex
+  - aif360
   - aiohttp
   - alabaster
   - anyio
@@ -52,6 +53,7 @@ dependencies:
   - docutils
   - entrypoints
   - expat
+  - fairlearn
   - filelock
   - flake8
   - flake8-isort
@@ -158,6 +160,7 @@ dependencies:
   - mkl
   - mkl-service
   - mkl_fft
+  - mlflow
   - mlxtend
   - more-itertools
   - multidict
@@ -275,6 +278,7 @@ dependencies:
   - sqlite
   - statsmodels
   - tangled-up-in-unicode
+  - tensorflow
   - terminado
   - testpath
   - threadpoolctl
@@ -304,6 +308,8 @@ dependencies:
   - zlib
   - zstd
   - pip:
+    - aix360
+    - azureml-mlflow
     - cx-Oracle
     - dedupe
     - deepmatcher
@@ -316,5 +322,7 @@ dependencies:
     - pynndescent
     - py_entitymatching
     - radian
+    - ray
+    - sqlfluff
     - umap-learn
 prefix: /opt/conda
