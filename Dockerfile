@@ -69,6 +69,18 @@ RUN apt-get update --fix-missing \
         libpango-1.0-0 \
         libxt6 \
         libsm6 \
+        # Packages required by several useful R packages
+        libopenblas-dev \
+        libv8-dev \
+        libharfbuzz-dev \
+        libfribidi-dev \
+        libfreetype6-dev \
+        libpng-dev \
+        libtiff5-dev \
+        libjpeg-dev \
+        # unixodbc-dev must be installed before the Microsoft ODBC driver to
+        # avoid version conflicts.
+        unixodbc-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen ${LANG} \
@@ -98,8 +110,7 @@ RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
         mssql-tools \
         odbc-postgresql \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm /etc/apt/sources.list.d/mssql-release.list
+    && rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
 ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
@@ -130,9 +141,9 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
     && apt-get install -y --no-install-recommends \
         r-base \
         r-base-dev \
-        littler \
+        r-cran-rodbc \
+        r-cran-littler \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/local/lib/R/etc/ \
     && echo "R_LIBS_SITE=${R_LIBS_SITE-'/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
         >> ${HOME}/.Renviron \
