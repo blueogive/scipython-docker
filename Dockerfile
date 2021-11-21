@@ -141,7 +141,6 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
     && apt-get install -y --no-install-recommends \
         r-base \
         r-base-dev \
-        r-cran-rodbc \
         r-cran-littler \
     && apt-get clean \
     && mkdir -p /usr/local/lib/R/etc/ \
@@ -158,17 +157,24 @@ RUN umask 0002 && \
     mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
     Rscript Rpkg_install.R && \
     rm rpkgs.csv Rpkg_install.R && \
+    ln -s /usr/local/0.89.4/hugo /usr/local/bin/hugo && \
     chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
-    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX
+    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX && \
+    # Install GoLang so Hugo will work
+    wget --quiet https://golang.org/dl/go1.17.3.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz && \
+    rm go1.17.3.linux-amd64.tar.gz
+
+ENV PATH=${PATH}:/usr/local/go/bin
 
 WORKDIR ${HOME}
 
 RUN umask 0002 && \
     wget --quiet \
-    https://github.com/conda-forge/miniforge/releases/download/4.10.3-5/Mambaforge-4.10.3-5-Linux-x86_64.sh \
+    https://github.com/conda-forge/miniforge/releases/download/4.10.3-7/Mambaforge-4.10.3-7-Linux-x86_64.sh \
     -O /root/mambaforge.sh && \
-    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "2aff37852fa373bbf2ff897f757cf66f" ]; then \
+    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "ab95d7b4fb52c299e92b04d7dc89fa95" ]; then \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
     /opt/conda/bin/mamba clean -atipsy && \
