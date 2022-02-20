@@ -10,21 +10,27 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:focal-20210723
+FROM ubuntu:focal-20220113
 
 USER root
 
-ENV RSTUDIO_VERSION=1.4.1717 \
-    PANDOC_TEMPLATES_VERSION=2.14.2 \
+ENV RSTUDIO_VERSION=2022.02.0-443 \
+    PANDOC_TEMPLATES_VERSION=2.17.1.1 \
+    GOLANG_VERSION=1.17.7 \
+    HUGO_VERSION=0.92.2 \
+    MAMBAFORGE_VERSION=4.11.0-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8"
-ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"
+ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
+  GOLANG_URL="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" \
+  MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh"
 
 RUN apt-get update --fix-missing \
     && apt-get install -y --no-install-recommends \
         bzip2 \
+        cmake \
         ca-certificates \
         curl \
         gdebi-core \
@@ -117,7 +123,7 @@ ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH}
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
-    CT_GID=100 \
+    CT_GID=1000 \
     CT_FMODE=0775 \
     CONDA_DIR=/opt/conda
 
@@ -126,7 +132,8 @@ ADD fix-permissions /usr/local/bin/fix-permissions
 
 ## Set a default user. Available via runtime flag `--user docker`
 ## User should also have & own a home directory (e.g. for linked volumes to work properly).
-RUN useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} \
+RUN groupadd --gid ${CT_GID} ${CT_USER} \
+  && useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} \
     --password ${CT_USER} ${CT_USER}
 
 ENV HOME=/home/${CT_USER}
@@ -146,7 +153,7 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
     && mkdir -p /usr/local/lib/R/etc/ \
     && echo "R_LIBS_SITE=${R_LIBS_SITE-'/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
         >> ${HOME}/.Renviron \
-    && chown ${CT_UID}:${CT_GID} ${HOME}/.Renviron \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.Renviron \
     && echo \
         "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" \
         >> /usr/local/lib/R/etc/Rprofile.site
@@ -157,26 +164,26 @@ RUN umask 0002 && \
     mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
     Rscript Rpkg_install.R && \
     rm rpkgs.csv Rpkg_install.R && \
-    ln -s /usr/local/0.89.4/hugo /usr/local/bin/hugo && \
+    ln -s /usr/local/${HUGO_VERSION}/hugo /usr/local/bin/hugo && \
     chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
     chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX && \
     # Install GoLang so Hugo will work
-    wget --quiet https://golang.org/dl/go1.17.3.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz && \
-    rm go1.17.3.linux-amd64.tar.gz
+    wget --quiet ${GOLANG_URL} && \
+    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
+    rm go${GOLANG_VERSION}.linux-amd64.tar.gz
 
 ENV PATH=${PATH}:/usr/local/go/bin
 
 WORKDIR ${HOME}
 
 RUN umask 0002 && \
-    wget --quiet \
-    https://github.com/conda-forge/miniforge/releases/download/4.10.3-7/Mambaforge-4.10.3-7-Linux-x86_64.sh \
-    -O /root/mambaforge.sh && \
-    if [ "`md5sum /root/mambaforge.sh | cut -d\  -f1`" = "ab95d7b4fb52c299e92b04d7dc89fa95" ]; then \
+    wget --quiet ${MAMBAFORGE_URL} -O /root/mambaforge.sh && \
+    wget --quiet ${MAMBAFORGE_URL}.sha256 -O /root/mambaforge.sh.sha256 && \
+    if [ "`sha256sum /root/mambaforge.sh | cut -d\  -f1`" = "`cat /root/mambaforge.sh.sha256 | cut -d\  -f1`" ]; then \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
+    rm /root/mambaforge.sh.sha256 && \
     /opt/conda/bin/mamba clean -atipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     fix-permissions ${CONDA_DIR} \
@@ -225,7 +232,10 @@ RUN wget -q $RSTUDIO_URL \
     && Rscript -e "install.packages('IRkernel')" \
     && Rscript -e "IRkernel::installspec(user=FALSE)" \
     && fix-permissions ${HOME}/.local \
-    && chown ${CT_UID}:${CT_GID} ${HOME}/.local
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.local \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cache \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.conda \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.ipython
 
 USER ${CT_USER}
 
@@ -249,9 +259,10 @@ RUN umask 0002 \
     && touch ${HOME}/.gitconfig \
     && mkdir ${HOME}/.ssh \
     && chmod 0700 ${HOME}/.ssh \
-    && chown ${CT_UID}:${CT_GID} ${HOME}/.ssh \
-    && chown ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
-    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.1
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.ssh \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
+    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.1 \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/R
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     RSESSION_PROXY_RSTUDIO_1_4=true \
@@ -279,7 +290,13 @@ COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
-RUN fix-permissions /etc/jupyter/
+RUN fix-permissions /etc/jupyter/ \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.config \
+    # link the shared object libs provided by conda
+    && echo "/opt/conda/lib" >> /etc/ld.so.conf.d/conda.conf \
+    # remove conda SO files that would otherwise conflict with system SOs
+    && rm /opt/conda/lib/libtinfo* \
+    && ldconfig
 
 USER ${CT_USER}
 WORKDIR ${HOME}/work

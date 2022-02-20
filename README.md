@@ -6,7 +6,7 @@ This repo contains a `Dockerfile` to build a foundational scientific Python
 foundation of the image is the [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
 environment management system developed by the Conda-Forge community. 
 Core packages included in the image include:
-* CPython (3.9)
+* CPython (3.10)
 * Numpy
 * SciPy
 * Pandas
@@ -26,8 +26,8 @@ Additional packages are included for:
 * Database connectivity (sqlalchemy, pyodbc, pymssql)
 
 In addition, it includes:
-* R (4.1.1)
-* RStudio-Server (1.4)
+* R (4.1.2)
+* RStudio-Server (2022.x)
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) so you can launch an RStudio session from within Jupyter Notebook
   and a collection of R packages centered around the [tidyverse](https://tidyverse.org), and literate programming.
 
@@ -46,7 +46,7 @@ container. The image includes the [gosu](https://github.com/tianon/gosu)
 utility, which allows you to conveniently execute commands as a less privileged user:
 
 ```bash
-gosu 1000:100 python myscript.py
+gosu 1000:1000 python myscript.py
 ```
 
 I borrowed much of the apparatus for enabling the launch of Jupyter 
@@ -57,7 +57,7 @@ commands to start a Jupyter server are similar to those they suggest.
 ## Jupyter Notebook
 
 ```bash
-docker run -it --init --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest gosu 1000:100 start-notebook.sh
+docker run -it --init --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest start-notebook.sh
 ```
 
 Note that the `--init` argument is necessary for the Jupyter process to start correctly within the container.
@@ -65,7 +65,7 @@ Note that the `--init` argument is necessary for the Jupyter process to start co
 ## Jupyter Lab
 
 ```bash
-docker run -it --init --rm -v $(pwd):/home/docker/work -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes blueogive/scipython-docker:latest gosu 1000:100 start-notebook.sh
+docker run -it --init --rm -v $(pwd):/home/docker/work -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes blueogive/scipython-docker:latest start-notebook.sh
 ```
 As the container starts, it will echo a bit of output to the console ending with statement similar to:
 
@@ -85,7 +85,7 @@ notebook server but change the command at the end and remove the `--init`
 argument:
 
 ```bash
-docker run -it --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest gosu 1000:100 /bin/bash
+docker run -it --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest
 ```
 
 Pressing `CTRL-d` within the container will cause it to terminate.
