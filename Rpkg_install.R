@@ -2,7 +2,7 @@
 
 pkgs <- read.csv('rpkgs.csv', header=TRUE)
 pkgvec <- as.vector(pkgs$Package)
-withCallingHandlers(install.packages(c(pkgvec), Ncpus = 4L),
+withCallingHandlers(install.packages(c(pkgvec)),
                     warning=function(w) stop(w))
 options(blogdown.hugo.dir='/usr/local/')
 blogdown::install_hugo()

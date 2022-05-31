@@ -6,17 +6,12 @@ This repo contains a `Dockerfile` to build a foundational scientific Python
 foundation of the image is the [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
 environment management system developed by the Conda-Forge community. 
 Core packages included in the image include:
-* CPython (3.10)
+* CPython (3.9)
 * Numpy
-* SciPy
 * Pandas
-* Cython
-* Scikit-Learn
-* Statsmodels
 * Matplotlib
 * Seaborn
 * Jupyter (Notebook, Lab)
-* Jupytext
 
 Additional packages are included for:
 * Documentation (Sphinx)
@@ -26,10 +21,13 @@ Additional packages are included for:
 * Database connectivity (sqlalchemy, pyodbc, pymssql)
 
 In addition, it includes:
-* R (4.1.2)
+* R (4.2.0)
 * RStudio-Server (2022.x)
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) so you can launch an RStudio session from within Jupyter Notebook
-  and a collection of R packages centered around the [tidyverse](https://tidyverse.org), and literate programming.
+  and a collection of R packages centered around the [tidyverse](https://tidyverse.org), and literate programming
+* [Golang](https://go.dev) (1.18.2) and [Hugo](https://gohugo.io) (0.100.2); and
+* [Rust](https://www.rust-lang.org) (1.61.0)
+
 
 ## Usage
 

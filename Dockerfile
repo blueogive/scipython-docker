@@ -10,15 +10,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:focal-20220113
+FROM ubuntu:focal-20220426
 
 USER root
 
-ENV RSTUDIO_VERSION=2022.02.0-443 \
+ENV RSTUDIO_VERSION=2022.02.2-485 \
     PANDOC_TEMPLATES_VERSION=2.17.1.1 \
-    GOLANG_VERSION=1.17.7 \
-    HUGO_VERSION=0.92.2 \
-    MAMBAFORGE_VERSION=4.11.0-0 \
+    GOLANG_VERSION=1.18.2 \
+    HUGO_VERSION=0.100.2 \
+    MAMBAFORGE_VERSION=4.12.0-2 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -56,7 +56,7 @@ RUN apt-get update --fix-missing \
         pandoc-citeproc \
         # Linux system packages that are dependencies of R packages
         libxml2-dev \
-        libcurl4-gnutls-dev \
+        libcurl4-openssl-dev \
         liblapack-dev \
         # libgdal-dev \
         # default-libmysqlclient-dev \
@@ -110,11 +110,14 @@ RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && apt-key add microsoft.asc \
     && rm microsoft.asc \
     && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
     && apt-get update \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
         msodbcsql17 \
         mssql-tools \
         odbc-postgresql \
+        postgresql-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -198,30 +201,32 @@ COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
 
 RUN umask 0002 \
     # Left overs from my experimentation with micromamba. It looks promising,
-    # but it seems it is not yet able to read conda environment (YAML) files.
-    # && wget -qO- https://micromamba.snakepit.net/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
-    # && ${HOME}/bin/micromamba shell init -s bash -p ${HOME}/micromamba
-    # && source ${HOME}/.bashrc
-    # && ${HOME}/bin/micromamba create -n base  --file ${CONDA_ENV_FILE} \
-    #       -c defaults conda conda-forge
-    # && ${HOME}/bin/micromamba clean -atipy \
+    # but it requires special syntax to execute commands within its environments within a Dockerfile. See https://github.com/mamba-org/micromamba-docker for hints.
+# RUN wget -qO- https://micromamba.snakepit.net/api/micromamba/linux-64/latest | tar -xvj bin/micromamba 
+# RUN ${HOME}/bin/micromamba shell init -s bash -p ${HOME}/micromamba 
+# RUN source ${HOME}/.bashrc 
+# RUN ${HOME}/bin/micromamba create -n base -r conda/env --file ${CONDA_ENV_FILE}
+# RUN ${HOME}/bin/micromamba clean --all --yes
     && /opt/conda/bin/mamba env update -n base --file ${CONDA_ENV_FILE} \
-    && /opt/conda/bin/mamba config --add channels conda-forge \
     && /opt/conda/bin/mamba config --set channel_priority strict \
     && /opt/conda/bin/mamba clean -atipy \
-    && rm ${CONDA_ENV_FILE}
+    && /opt/conda/bin/mamba init
+RUN rm ${CONDA_ENV_FILE}
 
 RUN mkdir -p ${HOME}/.jupyter/lab
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
+# RUN mamba init \
+#     && ["source", "${HOME}/.bashrc"] \
+#     && mamba activate base \
 RUN umask 0002 \
+#     && ["/opt/conda/bin/mamba", "activate",  "base"] \
+    # && ["jupyter", "labextension", "install", "@jupyterlab/hub-extension"] 
     && jupyter labextension install @jupyterlab/hub-extension \
     && npm cache clean --force \
     && jupyter notebook --generate-config \
     && jupyter lab build \
     && rm -rf ${CONDA_DIR}/share/jupyter/lab/staging \
-    && rm -rf ${HOME}/.cache/yarn \
-    && fix-permissions ${CONDA_DIR} \
-    && fix-permissions ${HOME}
+    && rm -rf ${HOME}/.cache/yarn
 
 USER root
 
@@ -231,7 +236,6 @@ RUN wget -q $RSTUDIO_URL \
     && rm rstudio-server-*-amd64.deb \
     && Rscript -e "install.packages('IRkernel')" \
     && Rscript -e "IRkernel::installspec(user=FALSE)" \
-    && fix-permissions ${HOME}/.local \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.local \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cache \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.conda \
@@ -239,10 +243,7 @@ RUN wget -q $RSTUDIO_URL \
 
 USER ${CT_USER}
 
-RUN umask 0002 \
-    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ${HOME}/.bashrc \
-    && echo "conda activate base" >> ${HOME}/.bashrc \
-    && mkdir ${HOME}/work
+RUN mkdir ${HOME}/work
 
 USER root
 
@@ -258,15 +259,19 @@ RUN umask 0002 \
     && fix-permissions ${HOME}/work \
     && touch ${HOME}/.gitconfig \
     && mkdir ${HOME}/.ssh \
+    && rm ${HOME}/.wget-hsts \
     && chmod 0700 ${HOME}/.ssh \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.ssh \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
-    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.1 \
+    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.2 \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/R
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     RSESSION_PROXY_RSTUDIO_1_4=true \
-    R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.1
+    R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.2
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
@@ -296,6 +301,8 @@ RUN fix-permissions /etc/jupyter/ \
     && echo "/opt/conda/lib" >> /etc/ld.so.conf.d/conda.conf \
     # remove conda SO files that would otherwise conflict with system SOs
     && rm /opt/conda/lib/libtinfo* \
+    # remove curl SOs installed by conda
+    && rm /opt/conda/lib/libcurl* \
     && ldconfig
 
 USER ${CT_USER}
