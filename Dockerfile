@@ -105,29 +105,54 @@ RUN mkdir -p /opt/pandoc/templates \
   && ln -s /opt/pandoc/templates ${HOME}/.pandoc/templates \
   && chown -R ${CT_USER}:${CT_GID} ${HOME}/.pandoc
 
+## Install Oracle Instant Client, tools
+RUN mkdir /opt/oracle
+WORKDIR /opt/oracle
+RUN curl -o instantclient-basiclite-linux.x64-21.6.0.0.0dbru.zip \
+    https://download.oracle.com/otn_software/linux/instantclient/216000/instantclient-basiclite-linux.x64-21.6.0.0.0dbru.zip \
+    && curl -o instantclient-sqlplus-linux.x64-21.6.0.0.0dbru.zip https://download.oracle.com/otn_software/linux/instantclient/216000/instantclient-sqlplus-linux.x64-21.6.0.0.0dbru.zip \
+    && unzip -oq 'instantclient-*.zip' \
+    && rm instantclient-*.zip
+
+WORKDIR /opt/oracle/instantclient_21_6
+RUN mkdir bin \
+    && mv sqlplus bin \
+    && mkdir -p sqlplus/admin \
+    && mv glogin.sql sqlplus/admin \
+    && echo /opt/oracle/instantclient_21_6 > \
+        /etc/ld.so.conf.d/oracle-instantclient.conf \
+    && ldconfig
+
 ## Install Microsoft and Postgres ODBC drivers and SQL commandline tools
 RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && apt-key add microsoft.asc \
     && rm microsoft.asc \
     && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && curl https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list > /etc/apt/sources.list.d/mssql-is-release.list \
     && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && apt-get update \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+RUN apt-get update \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
         msodbcsql17 \
         mssql-tools \
+        mssql-server-is \
         odbc-postgresql \
         postgresql-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
-ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:${PATH} \
+ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:/opt/ssis/bin:/opt/oracle/instantclient_19_8/bin:${PATH} \
+    ORACLE_HOME=/opt/oracle/instantclient_19_8 \
+    NLS_LANG=AMERICAN_AMERICA.UTF8 \
     SHELL=/bin/bash \
     CT_USER=docker \
     CT_UID=1000 \
     CT_GID=1000 \
     CT_FMODE=0775 \
+    SSIS_PID=Developer \
+    ACCEPT_EULA=Y \
     CONDA_DIR=/opt/conda
 
 # Add a script that we will use to correct permissions after running certain commands
@@ -295,6 +320,7 @@ COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
+COPY ssisconfhelper.py /opt/ssis/lib/ssis-conf/
 RUN fix-permissions /etc/jupyter/ \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.config \
     # link the shared object libs provided by conda
@@ -304,6 +330,8 @@ RUN fix-permissions /etc/jupyter/ \
     # remove curl SOs installed by conda
     && rm /opt/conda/lib/libcurl* \
     && ldconfig
+
+RUN /opt/ssis/bin/ssis-conf -n setup
 
 USER ${CT_USER}
 WORKDIR ${HOME}/work
