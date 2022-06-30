@@ -25,7 +25,8 @@ ENV RSTUDIO_VERSION=2022.02.2-485 \
     LANGUAGE="en_US.UTF-8"
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
   GOLANG_URL="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" \
-  MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh"
+  MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh" \
+  ORACLE_HOME=/opt/oracle/instantclient_21_6
 
 RUN apt-get update --fix-missing \
     && apt-get install -y --no-install-recommends \
@@ -114,12 +115,12 @@ RUN curl -o instantclient-basiclite-linux.x64-21.6.0.0.0dbru.zip \
     && unzip -oq 'instantclient-*.zip' \
     && rm instantclient-*.zip
 
-WORKDIR /opt/oracle/instantclient_21_6
+WORKDIR ${ORACLE_HOME}
 RUN mkdir bin \
     && mv sqlplus bin \
     && mkdir -p sqlplus/admin \
     && mv glogin.sql sqlplus/admin \
-    && echo /opt/oracle/instantclient_21_6 > \
+    && echo ${ORACLE_HOME} > \
         /etc/ld.so.conf.d/oracle-instantclient.conf \
     && ldconfig
 
@@ -143,8 +144,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
-ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:/opt/ssis/bin:/opt/oracle/instantclient_19_8/bin:${PATH} \
-    ORACLE_HOME=/opt/oracle/instantclient_19_8 \
+ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:/opt/ssis/bin:${ORACLE_HOME}/bin:${PATH} \
     NLS_LANG=AMERICAN_AMERICA.UTF8 \
     SHELL=/bin/bash \
     CT_USER=docker \
