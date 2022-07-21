@@ -88,6 +88,8 @@ RUN apt-get update --fix-missing \
         # unixodbc-dev must be installed before the Microsoft ODBC driver to
         # avoid version conflicts.
         unixodbc-dev \
+        # required by Oracl Instant Client
+        libaio1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen ${LANG} \
