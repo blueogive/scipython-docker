@@ -10,15 +10,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:focal-20220426
+FROM ubuntu:focal-20220922
 
 USER root
 
-ENV RSTUDIO_VERSION=2022.02.2-485 \
-    PANDOC_TEMPLATES_VERSION=2.17.1.1 \
-    GOLANG_VERSION=1.18.2 \
-    HUGO_VERSION=0.100.2 \
-    MAMBAFORGE_VERSION=4.12.0-2 \
+ENV RSTUDIO_VERSION=2022.07.2-576 \
+    PANDOC_TEMPLATES_VERSION=2.19.2 \
+    GOLANG_VERSION=1.19.2 \
+    HUGO_VERSION=0.104.3 \
+    MAMBAFORGE_VERSION=4.14.0-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -214,7 +214,7 @@ RUN umask 0002 && \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
     rm /root/mambaforge.sh.sha256 && \
-    /opt/conda/bin/mamba clean -atipsy && \
+    /opt/conda/bin/mamba clean -atipy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
