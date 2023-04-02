@@ -10,7 +10,7 @@ BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 TAG_DATE := $(shell date -u +"%Y%m%d")
 DOCKER_HUB_USER := blueogive
 DOCKER_IMG_NAME := scipython-docker
-# Use BuildKit
+# DO (Not) Use BuildKit
 export DOCKER_BUILDKIT := 1
 
 docker-prune :

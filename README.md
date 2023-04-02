@@ -1,12 +1,16 @@
 # SciPython-Docker
 
 This repo contains a `Dockerfile` to build a foundational scientific Python
-[Docker](https://www.docker.com) image. Built images are hosted on
+[Docker](https://www.docker.com) image. It is intended to be the foundation of 
+a development environment in a context where installing a bespoke set of 
+required packages from the internet may be cumbersome or discouraged. Built 
+images are hosted on 
 [Docker Hub](https://hub.docker.com/blueogive/scipython-docker). The
-foundation of the image is the [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
+foundation of the image is the 
+[Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
 environment management system developed by the Conda-Forge community. 
 Core packages included in the image include:
-* CPython (3.9)
+* CPython (3.10)
 * Numpy
 * Pandas
 * Matplotlib
@@ -19,14 +23,17 @@ Additional packages are included for:
 * Linting (flake8, pylint)
 * Environment management (python-dotenv)
 * Database connectivity (sqlalchemy, pyodbc, pymssql)
+* Literate programming ([Quarto](https://quarto.org))
 
 In addition, it includes:
-* R (4.2.0)
-* RStudio-Server (2022.x)
-* [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) so you can launch an RStudio session from within Jupyter Notebook
-  and a collection of R packages centered around the [tidyverse](https://tidyverse.org), and literate programming
-* [Golang](https://go.dev) (1.18.2) and [Hugo](https://gohugo.io) (0.100.2); and
-* [Rust](https://www.rust-lang.org) (1.61.0)
+* R (4.2.3);
+* RStudio-Server (1.4.x);
+* [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy),
+  so you can launch an RStudio session from within Jupyter Notebook/Lab,
+  and a collection of R packages centered around the 
+  [tidyverse](https://tidyverse.org), and literate programming;
+* [Golang](https://go.dev) (1.20.x) and [Hugo](https://gohugo.io) (0.111.x); and
+* [Rust](https://www.rust-lang.org) (1.66.x)
 
 
 ## Usage
@@ -94,6 +101,7 @@ To launch RStudio Server, start the container using either the Jupyter Lab or
 Jupyter Notebook commands above. Then, connect to the Jupyter server using your
 browser. If you started Jupyter Lab, use the menu to 'Launch Classic Notebook'.
 If you started a Jupyter Notebook, skip that step. Within the classic Notebook,
-click `New`, and select `RStudio`.
+click `New`, and select `RStudio`. In recent versions of Jupyter Lab, there is
+and RStudio launcher on the main/home page.
 
 Contributions are welcome.

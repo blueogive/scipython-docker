@@ -10,15 +10,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:focal-20220922
+FROM ubuntu:jammy-20230308
 
 USER root
 
-ENV RSTUDIO_VERSION=2022.07.2-576 \
-    PANDOC_TEMPLATES_VERSION=2.19.2 \
-    GOLANG_VERSION=1.19.2 \
-    HUGO_VERSION=0.104.3 \
-    MAMBAFORGE_VERSION=4.14.0-0 \
+ENV RSTUDIO_VERSION=1.4.1106 \
+    QUARTO_VERSION=1.3.302 \
+    PANDOC_TEMPLATES_VERSION=3.1.2 \
+    GOLANG_VERSION=1.20.2 \
+    HUGO_VERSION=0.111.3 \
+    MAMBAFORGE_VERSION=23.1.0-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -26,7 +27,9 @@ ENV RSTUDIO_VERSION=2022.07.2-576 \
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
   GOLANG_URL="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" \
   MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh" \
+  QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb" \
   ORACLE_HOME=/opt/oracle/instantclient_21_6
+ENV QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v1.3.302/${QUARTO_PKG}"
 
 RUN apt-get update --fix-missing \
     && apt-get install -y --no-install-recommends \
@@ -94,7 +97,10 @@ RUN apt-get update --fix-missing \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen ${LANG} \
     && dpkg-reconfigure locales \
-    && update-locale LANG=${LANG}
+    && update-locale LANG=${LANG} \
+    && wget -q ${QUARTO_URL} \
+    && dpkg -i ${QUARTO_PKG} \
+    && rm ${QUARTO_PKG}
 
 ## Install pandoc-templates.
 RUN mkdir -p /opt/pandoc/templates \
@@ -127,19 +133,17 @@ RUN mkdir bin \
     && ldconfig
 
 ## Install Microsoft and Postgres ODBC drivers and SQL commandline tools
-RUN curl -o microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
-    && apt-key add microsoft.asc \
-    && rm microsoft.asc \
-    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-    && curl https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list > /etc/apt/sources.list.d/mssql-is-release.list \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+    | gpg --dearmor -o /usr/share/keyrings/packages.microsoft.gpg \
+    && echo "deb [arch=amd64,armhf,arm64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/ubuntu/22.04/prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/mssql-release.list \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \ 
+    | gpg --dearmor -o /usr/share/keyrings/apt.postgresql.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/apt.postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 
 RUN apt-get update \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
         msodbcsql17 \
         mssql-tools \
-        mssql-server-is \
         odbc-postgresql \
         postgresql-client \
     && apt-get clean \
@@ -153,7 +157,6 @@ ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:/opt/ss
     CT_UID=1000 \
     CT_GID=1000 \
     CT_FMODE=0775 \
-    SSIS_PID=Developer \
     ACCEPT_EULA=Y \
     CONDA_DIR=/opt/conda
 
@@ -170,7 +173,7 @@ ENV HOME=/home/${CT_USER}
 
 WORKDIR ${HOME}
 
-RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > \
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/" > \
     /etc/apt/sources.list.d/cran40.list \
     && apt-key adv --keyserver keyserver.ubuntu.com \
         --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
@@ -242,15 +245,9 @@ RUN rm ${CONDA_ENV_FILE}
 
 RUN mkdir -p ${HOME}/.jupyter/lab
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
-# RUN mamba init \
-#     && ["source", "${HOME}/.bashrc"] \
-#     && mamba activate base \
 RUN umask 0002 \
-#     && ["/opt/conda/bin/mamba", "activate",  "base"] \
-    # && ["jupyter", "labextension", "install", "@jupyterlab/hub-extension"] 
-    && jupyter labextension install @jupyterlab/hub-extension \
-    && npm cache clean --force \
     && jupyter notebook --generate-config \
+    && jupyter server --generate-config \
     && jupyter lab build \
     && rm -rf ${CONDA_DIR}/share/jupyter/lab/staging \
     && rm -rf ${HOME}/.cache/yarn
@@ -259,8 +256,11 @@ USER root
 
 # Install RStudio-Server and the IRKernel package
 RUN wget -q $RSTUDIO_URL \
+    # RStudio-Server depends on this non-standard package
+    && wget -q http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.17_amd64.deb \
+    && dpkg -i libssl1.1_*_amd64.deb \
     && dpkg -i rstudio-server-*-amd64.deb \
-    && rm rstudio-server-*-amd64.deb \
+    && rm *amd64.deb \
     && Rscript -e "install.packages('IRkernel')" \
     && Rscript -e "IRkernel::installspec(user=FALSE)" \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.local \
@@ -298,7 +298,7 @@ ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.2
 
 # Install Rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
@@ -321,19 +321,18 @@ EXPOSE 8888
 COPY start.sh /usr/local/bin/
 COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
-COPY jupyter_notebook_config.py /etc/jupyter/
-COPY ssisconfhelper.py /opt/ssis/lib/ssis-conf/
-RUN fix-permissions /etc/jupyter/ \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.config \
+COPY fonts.zip /usr/local/share/fonts
+RUN chown -R ${CT_UID}:${CT_GID} ${HOME}/.config \
     # link the shared object libs provided by conda
     && echo "/opt/conda/lib" >> /etc/ld.so.conf.d/conda.conf \
     # remove conda SO files that would otherwise conflict with system SOs
     && rm /opt/conda/lib/libtinfo* \
     # remove curl SOs installed by conda
     && rm /opt/conda/lib/libcurl* \
-    && ldconfig
-
-RUN /opt/ssis/bin/ssis-conf -n setup
+    && ldconfig \
+    && unzip /usr/local/share/fonts/fonts.zip -d /usr/local/share/fonts \
+    && rm /usr/local/share/fonts/fonts.zip \
+    && fc-cache -f
 
 USER ${CT_USER}
 WORKDIR ${HOME}/work
