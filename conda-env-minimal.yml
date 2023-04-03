@@ -3,7 +3,7 @@
 # To remove the version specifications in the packages below use this regex:
 # Search: - ([A-z0-9_\-]{2,})=[A-z0-9_\-\.]{1,}?=[A-z0-9_\-]*
 # Replace: - $1
-name: base
+name: minimal
 channels:
   - conda-forge
   - defaults
@@ -12,7 +12,6 @@ dependencies:
   - coverage
   - flake8
   - flake8-isort
-  - fontconfig
   - isort
   - jupyter
   - jupyter-packaging
@@ -23,53 +22,19 @@ dependencies:
   - jupyter_contrib_core
   - jupyter_contrib_nbextensions
   - jupyter_core
-  - jupyter_highlight_selected_word
   - jupyter_nbextensions_configurator
   - jupyter_server
   - jupyterlab
-  - jupyterlab_pygments
   - jupyterlab_server
-  - jupyterlab_widgets
-  - krb5
-  - libblas
-  - libcblas
-  - libclang
-  - libgcc-ng
-  - libgfortran-ng
-  - libgfortran4
-  - libglib
-  - libiconv
-  - liblapack
-  - libllvm10
-  - libllvm11
-  - libopenblas
-  - libxml2
-  - libxslt
-  - llvm-openmp
-  - llvmlite
-  - lxml
-  - lz4-c
-  - lzo
-  - mkl
-  - mypy
   - nodejs
-  - numpy
-  - pandas
   - pip
-  - pyarrow
   - pymssql
   - pyodbc
   - pytest
   - python=3.10
-  - readline
-  - setuptools
   - sqlalchemy
   - unixodbc
   - pip:
-    - dbx
-    - cx-Oracle
     - pre-commit
     - ptvsd
-    - git+https://github.com/blueogive/pyncrypt.git@master
-    - radian
-prefix: /opt/conda
+prefix: /home/docker/.conda/envs/minimal

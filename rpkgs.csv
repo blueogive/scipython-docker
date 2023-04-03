@@ -3,6 +3,7 @@
 "bookdown"
 "devtools"
 "httpgd"
+"IRkernel"
 "jsonlite"
 "languageserver"
 "odbc"

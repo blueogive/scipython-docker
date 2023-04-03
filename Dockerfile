@@ -181,30 +181,27 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/" > \
     && apt-get install -y --no-install-recommends \
         r-base \
         r-base-dev \
-        r-cran-littler \
     && apt-get clean \
     && mkdir -p /usr/local/lib/R/etc/ \
-    && echo "R_LIBS_SITE=${R_LIBS_SITE-'/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
+    && mkdir -p --mode ${CT_FMODE} ${HOME}/R/utils \
+    && mkdir -p --mode ${CT_FMODE} ${HOME}/R/site-library \
+    && echo "R_LIBS_SITE=${R_LIBS_SITE-'${HOME}/R/site-library:/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
         >> ${HOME}/.Renviron \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.Renviron \
     && echo \
         "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" \
-        >> /usr/local/lib/R/etc/Rprofile.site
+        >> /usr/local/lib/R/etc/Rprofile.site 
 
-COPY rpkgs.csv rpkgs.csv
-COPY Rpkg_install.R Rpkg_install.R
-RUN umask 0002 && \
-    mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint && \
-    Rscript Rpkg_install.R && \
-    rm rpkgs.csv Rpkg_install.R && \
-    ln -s /usr/local/${HUGO_VERSION}/hugo /usr/local/bin/hugo && \
-    chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint && \
-    chown -R ${CT_USER}:${CT_GID} ${HOME}/bin && \
-    chown -R ${CT_USER}:${CT_GID} ${HOME}/.TinyTeX && \
+COPY rpkgs.csv ${HOME}/R/utils/rpkgs.csv
+COPY Rpkg_install.R ${HOME}/R/utils/Rpkg_install.R
+RUN umask 0002 \
+    && mkdir -p --mode ${CT_FMODE} ${HOME}/.checkpoint \
+    && ln -s /usr/local/${HUGO_VERSION}/hugo /usr/local/bin/hugo \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.checkpoint \
     # Install GoLang so Hugo will work
-    wget --quiet ${GOLANG_URL} && \
-    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
-    rm go${GOLANG_VERSION}.linux-amd64.tar.gz
+    && wget --quiet ${GOLANG_URL} \
+    && tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz \
+    && rm go${GOLANG_VERSION}.linux-amd64.tar.gz
 
 ENV PATH=${PATH}:/usr/local/go/bin
 
@@ -224,33 +221,15 @@ RUN umask 0002 && \
 
 USER ${CT_USER}
 
-SHELL [ "/bin/bash", "--login", "-c"]
+SHELL ["/bin/bash", "--login", "-c"]
 
+RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.conda/envs
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
-COPY ${CONDA_ENV_FILE} ${CONDA_ENV_FILE}
+COPY ${CONDA_ENV_FILE} ${HOME}/.conda/${CONDA_ENV_FILE}
+COPY conda-env-minimal.yml ${HOME}/.conda/conda-env-minimal.yml
 
-RUN umask 0002 \
-    # Left overs from my experimentation with micromamba. It looks promising,
-    # but it requires special syntax to execute commands within its environments within a Dockerfile. See https://github.com/mamba-org/micromamba-docker for hints.
-# RUN wget -qO- https://micromamba.snakepit.net/api/micromamba/linux-64/latest | tar -xvj bin/micromamba 
-# RUN ${HOME}/bin/micromamba shell init -s bash -p ${HOME}/micromamba 
-# RUN source ${HOME}/.bashrc 
-# RUN ${HOME}/bin/micromamba create -n base -r conda/env --file ${CONDA_ENV_FILE}
-# RUN ${HOME}/bin/micromamba clean --all --yes
-    && /opt/conda/bin/mamba env update -n base --file ${CONDA_ENV_FILE} \
-    && /opt/conda/bin/mamba config --set channel_priority strict \
-    && /opt/conda/bin/mamba clean -atipy \
-    && /opt/conda/bin/mamba init
-RUN rm ${CONDA_ENV_FILE}
-
-RUN mkdir -p ${HOME}/.jupyter/lab
+RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.jupyter/lab
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
-RUN umask 0002 \
-    && jupyter notebook --generate-config \
-    && jupyter server --generate-config \
-    && jupyter lab build \
-    && rm -rf ${CONDA_DIR}/share/jupyter/lab/staging \
-    && rm -rf ${HOME}/.cache/yarn
 
 USER root
 
@@ -261,44 +240,26 @@ RUN wget -q $RSTUDIO_URL \
     && dpkg -i libssl1.1_*_amd64.deb \
     && dpkg -i rstudio-server-*-amd64.deb \
     && rm *amd64.deb \
-    && Rscript -e "install.packages('IRkernel')" \
-    && Rscript -e "IRkernel::installspec(user=FALSE)" \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.local \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cache \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.conda \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.ipython
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.conda
 
 USER ${CT_USER}
 
-RUN mkdir ${HOME}/work
+RUN mkdir --mode ${CT_FMODE} ${HOME}/work \
+    && echo "TIP: To enable conda-/mamba-enabled Python virtual envs, type:" >> ${HOME}/.bashrc \
+    && echo "  mamba init" >> ${HOME}/.bashrc
 
 USER root
 
-RUN umask 0002 \
-    && source ${HOME}/.bashrc \
-    && git clone https://github.com/blueogive/pyncrypt.git \
-    && pip install --no-cache-dir --disable-pip-version-check pyncrypt/ \
-    && rm -rf pyncrypt \
-    && git clone https://github.com/jupyterhub/jupyter-rsession-proxy.git \
-    && pip install --no-cache-dir --disable-pip-version-check jupyter-rsession-proxy/ \
-    && rm -rf jupyter-rsession-proxy \
-    && mkdir -p .config/pip \
-    && fix-permissions ${HOME}/work \
-    && touch ${HOME}/.gitconfig \
-    && mkdir ${HOME}/.ssh \
-    && rm ${HOME}/.wget-hsts \
-    && chmod 0700 ${HOME}/.ssh \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.ssh \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.gitconfig \
-    && mkdir -p ${HOME}/R/x86_64-pc-linux-gnu-library/4.2 \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/R
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     RSESSION_PROXY_RSTUDIO_1_4=true \
     R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.2
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cargo \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.rustup \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/R
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
