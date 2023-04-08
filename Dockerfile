@@ -214,7 +214,7 @@ RUN umask 0002 && \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
     rm /root/mambaforge.sh.sha256 && \
-    /opt/conda/bin/mamba clean -atipy && \
+    /opt/conda/bin/mamba clean -ay && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
@@ -226,7 +226,7 @@ SHELL ["/bin/bash", "--login", "-c"]
 RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.conda/envs
 ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
 COPY ${CONDA_ENV_FILE} ${HOME}/.conda/${CONDA_ENV_FILE}
-COPY conda-env-minimal.yml ${HOME}/.conda/conda-env-minimal.yml
+COPY conda-env-no-version.yml ${HOME}/.conda/conda-env.yml
 
 RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.jupyter/lab
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
@@ -241,12 +241,6 @@ RUN wget -q $RSTUDIO_URL \
     && dpkg -i rstudio-server-*-amd64.deb \
     && rm *amd64.deb \
     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.conda
-
-USER ${CT_USER}
-
-RUN mkdir --mode ${CT_FMODE} ${HOME}/work \
-    && echo "TIP: To enable conda-/mamba-enabled Python virtual envs, type:" >> ${HOME}/.bashrc \
-    && echo "  mamba init" >> ${HOME}/.bashrc
 
 USER root
 

@@ -14,6 +14,7 @@ dependencies:
   - flake8-isort
   - fontconfig
   - isort
+  - jinja2
   - jupyter
   - jupyter-packaging
   - jupyter-rsession-proxy
@@ -50,20 +51,27 @@ dependencies:
   - lxml
   - lz4-c
   - lzo
+  - matplotlib
   - mkl
   - mypy
   - nodejs
+  - numba
+  - numexpr
   - numpy
-  - pandas
+  - openpyxl
+  - pandas[all]
   - pip
+  - psycopg2
   - pyarrow
   - pymssql
   - pyodbc
   - pytest
   - python=3.10
+  - python-snappy
   - readline
   - setuptools
   - sqlalchemy
+  - tabulate
   - unixodbc
   - pip:
     - dbx
@@ -72,4 +80,4 @@ dependencies:
     - ptvsd
     - git+https://github.com/blueogive/pyncrypt.git@master
     - radian
-prefix: /opt/conda
+prefix: /home/docker/.conda/envs
