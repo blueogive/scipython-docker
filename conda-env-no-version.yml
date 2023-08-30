@@ -3,7 +3,7 @@
 # To remove the version specifications in the packages below use this regex:
 # Search: - ([A-z0-9_\-]{2,})=[A-z0-9_\-\.]{1,}?=[A-z0-9_\-]*
 # Replace: - $1
-name: base
+name: example
 channels:
   - conda-forge
   - defaults
@@ -22,10 +22,10 @@ dependencies:
   - jupyter_client
   - jupyter_console
   - jupyter_contrib_core
-  - jupyter_contrib_nbextensions
+  # - jupyter_contrib_nbextensions
   - jupyter_core
-  - jupyter_highlight_selected_word
-  - jupyter_nbextensions_configurator
+  # - jupyter_highlight_selected_word
+  # - jupyter_nbextensions_configurator
   - jupyter_server
   - jupyterlab
   - jupyterlab_pygments
@@ -80,4 +80,4 @@ dependencies:
     - ptvsd
     - git+https://github.com/blueogive/pyncrypt.git@master
     - radian
-prefix: /home/docker/.conda/envs
+prefix: /home/docker/.conda/envs/example

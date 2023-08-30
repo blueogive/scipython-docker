@@ -6,7 +6,7 @@ set -e
 
 # set default ip to 0.0.0.0
 if [[ "$NOTEBOOK_ARGS $@" != *"--ip="* ]]; then
-    NOTEBOOK_ARGS="--ip=0.0.0.0 $NOTEBOOK_ARGS"
+    NOTEBOOK_ARGS="--ip=0.0.0.0 --no-browser $NOTEBOOK_ARGS"
 fi
 
 # handle some deprecated environment variables

@@ -370,4 +370,4 @@ dependencies:
       - uri-template==1.2.0
       - virtualenv==20.21.0
       - webcolors==1.13
-prefix: /home/docker/.conda/envs
+prefix: /home/docker/.conda/envs/base

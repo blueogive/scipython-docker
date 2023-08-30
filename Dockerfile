@@ -10,26 +10,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:jammy-20230308
+FROM ubuntu:jammy-20230804
 
 USER root
 
-ENV RSTUDIO_VERSION=1.4.1106 \
-    QUARTO_VERSION=1.3.302 \
-    PANDOC_TEMPLATES_VERSION=3.1.2 \
-    GOLANG_VERSION=1.20.2 \
-    HUGO_VERSION=0.111.3 \
-    MAMBAFORGE_VERSION=23.1.0-0 \
+ENV RSTUDIO_VERSION=2023.06.2-561 \
+    QUARTO_VERSION=1.3.450 \
+    PANDOC_TEMPLATES_VERSION=3.1.6.2 \
+    GOLANG_VERSION=1.21.0 \
+    HUGO_VERSION=0.117.0 \
+    MAMBAFORGE_VERSION=23.3.1-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8"
-ENV RSTUDIO_URL="https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
+ENV RSTUDIO_URL="https://download2.rstudio.org/server/focal/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
   GOLANG_URL="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" \
   MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh" \
   QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb" \
   ORACLE_HOME=/opt/oracle/instantclient_21_6
-ENV QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v1.3.302/${QUARTO_PKG}"
+ENV QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/${QUARTO_PKG}"
 
 RUN apt-get update --fix-missing \
     && apt-get install -y --no-install-recommends \
@@ -103,16 +103,16 @@ RUN apt-get update --fix-missing \
     && rm ${QUARTO_PKG}
 
 ## Install pandoc-templates.
-RUN mkdir -p /opt/pandoc/templates \
-  && cd /opt/pandoc/templates \
-  && wget -q https://github.com/jgm/pandoc-templates/archive/${PANDOC_TEMPLATES_VERSION}.tar.gz \
-  && tar xzf ${PANDOC_TEMPLATES_VERSION}.tar.gz \
-  && rm ${PANDOC_TEMPLATES_VERSION}.tar.gz \
-  && mkdir -p /root/.pandoc \
-  && ln -s /opt/pandoc/templates /root/.pandoc/templates \
-  && mkdir -p ${HOME}/.pandoc \
-  && ln -s /opt/pandoc/templates ${HOME}/.pandoc/templates \
-  && chown -R ${CT_USER}:${CT_GID} ${HOME}/.pandoc
+# RUN mkdir -p /opt/pandoc/templates \
+#   && cd /opt/pandoc/templates \
+#   && wget -q https://github.com/jgm/pandoc-templates/archive/${PANDOC_TEMPLATES_VERSION}.tar.gz \
+#   && tar xzf ${PANDOC_TEMPLATES_VERSION}.tar.gz \
+#   && rm ${PANDOC_TEMPLATES_VERSION}.tar.gz \
+#   && mkdir -p /root/.pandoc \
+#   && ln -s /opt/pandoc/templates /root/.pandoc/templates \
+#   && mkdir -p ${HOME}/.pandoc \
+#   && ln -s /opt/pandoc/templates ${HOME}/.pandoc/templates \
+#   && chown -R ${CT_USER}:${CT_GID} ${HOME}/.pandoc
 
 ## Install Oracle Instant Client, tools
 RUN mkdir /opt/oracle
@@ -158,16 +158,19 @@ ENV PATH=/opt/conda/bin:/opt/mssql-tools/bin:/usr/lib/rstudio-server/bin:/opt/ss
     CT_GID=1000 \
     CT_FMODE=0775 \
     ACCEPT_EULA=Y \
-    CONDA_DIR=/opt/conda
+    OPENSSL_CONF=/etc/ssl/openssl.cnf
 
 # Add a script that we will use to correct permissions after running certain commands
 ADD fix-permissions /usr/local/bin/fix-permissions
 
 ## Set a default user. Available via runtime flag `--user docker`
-## User should also have & own a home directory (e.g. for linked volumes to work properly).
+## User should also have & own a home directory (e.g. for linked volumes to 
+## work properly). Appending the option statement to the openssl config file
+## ensures that opensslv3 is able to connect to hosts using older versions.
 RUN groupadd --gid ${CT_GID} ${CT_USER} \
   && useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} \
-    --password ${CT_USER} ${CT_USER}
+    --password ${CT_USER} ${CT_USER} \
+    && echo "Options = UnsafeLegacyRenegotiation" | tee -a ${OPENSSL_CONF}
 
 ENV HOME=/home/${CT_USER}
 
@@ -224,19 +227,21 @@ USER ${CT_USER}
 SHELL ["/bin/bash", "--login", "-c"]
 
 RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.conda/envs
-ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
-COPY ${CONDA_ENV_FILE} ${HOME}/.conda/${CONDA_ENV_FILE}
+# ARG CONDA_ENV_FILE=${CONDA_ENV_FILE}
+# COPY ${CONDA_ENV_FILE} ${HOME}/.conda/${CONDA_ENV_FILE}
 COPY conda-env-no-version.yml ${HOME}/.conda/conda-env.yml
+COPY conda-env-minimal.yml ${HOME}/.conda/conda-env-minimal.yml
 
 RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.jupyter/lab
-ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
+ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab \
+    CONDA_DIR=${HOME}/.conda
 
 USER root
 
 # Install RStudio-Server and the IRKernel package
 RUN wget -q $RSTUDIO_URL \
     # RStudio-Server depends on this non-standard package
-    && wget -q http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.17_amd64.deb \
+    && wget -q http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb \
     && dpkg -i libssl1.1_*_amd64.deb \
     && dpkg -i rstudio-server-*-amd64.deb \
     && rm *amd64.deb \
@@ -247,7 +252,7 @@ USER root
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     RSESSION_PROXY_RSTUDIO_1_4=true \
-    R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.2
+    R_LIBS_USER=${HOME}/R/x86_64-pc-linux-gnu-library/4.3
 
 # Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \

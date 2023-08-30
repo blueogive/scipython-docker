@@ -20,9 +20,9 @@ dependencies:
   - jupyter_client
   - jupyter_console
   - jupyter_contrib_core
-  - jupyter_contrib_nbextensions
+  # - jupyter_contrib_nbextensions
   - jupyter_core
-  - jupyter_nbextensions_configurator
+  # - jupyter_nbextensions_configurator
   - jupyter_server
   - jupyterlab
   - jupyterlab_server
