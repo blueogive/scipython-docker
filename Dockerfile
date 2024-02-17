@@ -10,16 +10,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:jammy-20230804
+FROM ubuntu:jammy-20240212
 
 USER root
 
-ENV RSTUDIO_VERSION=2023.06.2-561 \
-    QUARTO_VERSION=1.3.450 \
+ENV RSTUDIO_VERSION=2023.12.1-402 \
+    QUARTO_VERSION=1.4.550 \
     PANDOC_TEMPLATES_VERSION=3.1.6.2 \
-    GOLANG_VERSION=1.21.0 \
-    HUGO_VERSION=0.117.0 \
-    MAMBAFORGE_VERSION=23.3.1-0 \
+    GOLANG_VERSION=1.22.0 \
+    HUGO_VERSION=0.122.0 \
+    MAMBAFORGE_VERSION=23.11.0-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -217,8 +217,11 @@ RUN umask 0002 && \
         /bin/bash /root/mambaforge.sh -b -p /opt/conda; fi && \
     rm /root/mambaforge.sh && \
     rm /root/mambaforge.sh.sha256 && \
-    /opt/conda/bin/mamba clean -ay && \
+    /opt/conda/bin/mamba clean -fay && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.pyc' -delete && \
+    find /opt/conda/ -follow -type d -name '__pycache__' -delete && \
     fix-permissions ${CONDA_DIR} \
     && fix-permissions /home/${CT_USER}
 
@@ -241,7 +244,7 @@ USER root
 # Install RStudio-Server and the IRKernel package
 RUN wget -q $RSTUDIO_URL \
     # RStudio-Server depends on this non-standard package
-    && wget -q http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb \
+    && wget -q http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.21_amd64.deb \
     && dpkg -i libssl1.1_*_amd64.deb \
     && dpkg -i rstudio-server-*-amd64.deb \
     && rm *amd64.deb \
@@ -296,4 +299,12 @@ RUN chown -R ${CT_UID}:${CT_GID} ${HOME}/.config \
 
 USER ${CT_USER}
 WORKDIR ${HOME}/work
+
+# Install Quarto extensions, filters because Rust refuses to install them with
+# self-signed TLS certificates in the chain.
+RUN quarto add --no-prompt quarto-ext/include-code-files \
+    && quarto install extension --no-prompt --quiet grantmcdermott/quarto-revealjs-clean \
+    && quarto install extension --no-prompt --quiet andrewheiss/hikmah-pdf \
+    && quarto install extension --no-prompt --quiet andrewheiss/hikmah-manuscript-docx \
+    && quarto install extension --no-prompt --quiet shafayetShafee/metropolis
 CMD [ "/bin/bash" ]

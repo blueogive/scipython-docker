@@ -6,7 +6,7 @@
 name: minimal
 channels:
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - black
   - coverage
@@ -37,4 +37,5 @@ dependencies:
   - pip:
     - pre-commit
     - ptvsd
+    - ruff
 prefix: /home/docker/.conda/envs/minimal

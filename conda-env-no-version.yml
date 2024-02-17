@@ -6,7 +6,7 @@
 name: example
 channels:
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - black
   - coverage

@@ -1,8 +1,5 @@
 "Package"
-"blogdown"
-"bookdown"
 "devtools"
-"httpgd"
 "IRkernel"
 "jsonlite"
 "languageserver"
