@@ -66,7 +66,7 @@ dependencies:
   - pymssql
   - pyodbc
   - pytest
-  - python=3.10
+  - python=3.12
   - python-snappy
   - readline
   - setuptools
@@ -74,10 +74,13 @@ dependencies:
   - tabulate
   - unixodbc
   - pip:
+    - databricks-connect
+    - databricks-sdk
     - dbx
     - cx-Oracle
     - pre-commit
     - ptvsd
     - git+https://github.com/blueogive/pyncrypt.git@master
     - radian
-prefix: /home/docker/.conda/envs/example
+    - ruff
+prefix: /home/docker/miniforge3/envs/example

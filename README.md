@@ -10,12 +10,7 @@ foundation of the image is the
 [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
 environment management system developed by the Conda-Forge community. 
 Core packages included in the image include:
-* CPython (3.10)
-* Numpy
-* Pandas
-* Matplotlib
-* Seaborn
-* Jupyter (Notebook, Lab)
+* CPython (3.12)
 
 Additional packages are included for:
 * Documentation (Sphinx)
@@ -26,14 +21,12 @@ Additional packages are included for:
 * Literate programming ([Quarto](https://quarto.org))
 
 In addition, it includes:
-* R (4.2.3);
-* RStudio-Server (1.4.x);
+* R (4.4.1);
+* RStudio-Server;
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy),
   so you can launch an RStudio session from within Jupyter Notebook/Lab,
   and a collection of R packages centered around the 
   [tidyverse](https://tidyverse.org), and literate programming;
-* [Golang](https://go.dev) (1.20.x) and [Hugo](https://gohugo.io) (0.111.x); and
-* [Rust](https://www.rust-lang.org) (1.66.x)
 
 
 ## Usage
@@ -47,61 +40,63 @@ docker run -it --rm -v $(pwd):/home/docker/work blueogive/scipython-docker:lates
 ```
 
 By default, you will be running as the (unprivileged) `docker` user within the 
-container. The image includes the [gosu](https://github.com/tianon/gosu) 
-utility, which allows you to conveniently execute commands as a less privileged user:
+container.
+
+## Typical Usage
+
+Instantiate a container from the image:
 
 ```bash
-gosu 1000:1000 python myscript.py
+docker run -d --name <container_name> -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest /bin/sleep infinity
 ```
 
-I borrowed much of the apparatus for enabling the launch of Jupyter 
-Notebook/Lab server processes from the 
-[Jupyter Docker Stacks](https://github.com/jupyter/docker-stacks/), so the 
-commands to start a Jupyter server are similar to those they suggest.
+replacing `<container_name>` with the name you wish to assign to your container.
 
-## Jupyter Notebook
+At this point, you will have a Bash shell with the `base` mamba/conda Python 
+virtual environment will be active. You can use the remote development 
+capabilities of VSCode to connect to the container and begin working. 
+
+Alternatively, you may wish to use Jupyter Lab or RStudio within the container.
+In that case you will need to complete some additional setup. Open a shell within the container:
 
 ```bash
-docker run -it --init --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest start-notebook.sh
+docker exec -it <container_name> /bin/bash
 ```
 
-Note that the `--init` argument is necessary for the Jupyter process to start correctly within the container.
-
-## Jupyter Lab
+Create a new conda/mamber virtual environment that includes Jupyter (because the `base` virtual environment does not):
 
 ```bash
-docker run -it --init --rm -v $(pwd):/home/docker/work -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes blueogive/scipython-docker:latest start-notebook.sh
+mamba env create -f ~/miniforge3/examples/conda-env-minimal.yml
 ```
-As the container starts, it will echo a bit of output to the console ending with statement similar to:
+
+Activate the new virtual environment:
+
+```bash
+mamba activate minimal
+```
+
+If you want to use `R` within Jupyter, install the `R` kernel:
+
+```bash
+Rscript -e "IRkernel::installspec()"
+```
+
+Complete the post-install build of Jupyter Lab and start the service:
+
+```bash
+jupyter lab build
+jupyter lab --no-browser --ip 0.0.0.0 --notebook-dir=~/work
+```
+
+As Jupyter Lab starts, it will echo a bit of output to the console ending with statement similar to:
 
 ```
 Or copy and paste one of these URLs:
         http://(<container_id> or 127.0.0.1):8888/?token=<token_value>
 ```
-where `<container_id>` and `<token_value>` are hexadecimal strings unique to 
-your instance. If the host name of the machine on which you executed the 
-`docker run` command is `<host_name>`, open a web browser and put the following 
-in the location bar: `http://<host_name>:8888/?token=<token_value>` to connect 
-to the Jupyter Lab instance.
-
-If you want a shell prompt as a non-root user inside the container without
-starting a Jupyter server, use the command below, noting that above to start the
-notebook server but change the command at the end and remove the `--init`
-argument:
-
-```bash
-docker run -it --rm -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest
-```
-
-Pressing `CTRL-d` within the container will cause it to terminate.
-
-## RStudio Server
-
-To launch RStudio Server, start the container using either the Jupyter Lab or
-Jupyter Notebook commands above. Then, connect to the Jupyter server using your
-browser. If you started Jupyter Lab, use the menu to 'Launch Classic Notebook'.
-If you started a Jupyter Notebook, skip that step. Within the classic Notebook,
-click `New`, and select `RStudio`. In recent versions of Jupyter Lab, there is
-and RStudio launcher on the main/home page.
+where `<container_id>` and `<token_value>` are hexadecimal strings unique to
+your instance. On your host, open your preferred browser and point it to
+`http://localhost:8888/?token=<token_value>` to connect to the Jupyter Lab
+instance.
 
 Contributions are welcome.
