@@ -138,23 +138,23 @@ ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${ORACLE_HOME}/bin:$
     NLS_LANG=AMERICAN_AMERICA.UTF8 \
     SHELL=/bin/bash \
     CT_USER=docker \
-    CT_UID=1001 \
-    CT_GID=1001 \
+    CT_UID=1000 \
+    CT_GID=1000 \
     CT_FMODE=0775 \
     ACCEPT_EULA=Y \
     OPENSSL_CONF=/etc/ssl/openssl.cnf
 
+# Rename the default user and the associated homedir
+    RUN usermod -l ${CT_USER} ubuntu \
+    && groupmod -n ${CT_USER} ubuntu \
+    && usermod -d /home/${CT_USER} -m ${CT_USER}
+
 # Add a script that we will use to correct permissions after running certain commands
 ADD fix-permissions /usr/local/bin/fix-permissions
 
-## Set a default user. Available via runtime flag `--user docker`
-## User should also have & own a home directory (e.g. for linked volumes to 
-## work properly). Appending the option statement to the openssl config file
+## Appending the option statement to the openssl config file
 ## ensures that opensslv3 is able to connect to hosts using older versions.
-RUN groupadd --gid ${CT_GID} ${CT_USER} \
-    && useradd --create-home --uid ${CT_UID} --gid ${CT_GID} --shell ${SHELL} \
-    --password ${CT_USER} ${CT_USER} \
-    && echo "Options = UnsafeLegacyRenegotiation" | tee -a ${OPENSSL_CONF}
+RUN echo "Options = UnsafeLegacyRenegotiation" | tee -a ${OPENSSL_CONF}
 
 ENV HOME=/home/${CT_USER}
 
@@ -189,15 +189,12 @@ RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/downloa
     && bash Miniforge3-$(uname)-$(uname -m).sh -b \
     && rm Miniforge3-$(uname)-$(uname -m).sh
 
-# RUN chown -R ${CT_UID}:${CT_GID} ${HOME}
-# USER ${CT_USER}
 
 RUN mkdir -p --mode ${CT_FMODE} ${HOME}/miniforge3/examples \
     && mkdir -p --mode ${CT_FMODE} ${HOME}/.jupyter/lab
 COPY conda-env-no-version.yml ${HOME}/miniforge3/examples/conda-env.yml
 COPY conda-env-minimal.yml ${HOME}/miniforge3/examples/conda-env-minimal.yml
 
-# RUN mkdir -p --mode ${CT_FMODE} ${HOME}/.jupyter/lab
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
 
 USER root
@@ -206,8 +203,6 @@ USER root
 RUN wget -q $RSTUDIO_URL \
     && gdebi -n rstudio-server-*.deb \
     && rm rstudio-server-*.deb
-
-USER root
 
 COPY pip.conf .config/pip/pip.conf
 ENV PATH=${HOME}/miniforge3/bin:${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
@@ -229,19 +224,21 @@ COPY start-notebook.sh /usr/local/bin/
 COPY start-singleuser.sh /usr/local/bin/
 COPY start-jupyterlab.sh /usr/local/bin/
 COPY fonts.zip /usr/local/share/fonts
-RUN chown -R ${CT_UID}:${CT_GID} ${HOME}/.config \
+RUN chown -R ${CT_UID}:${CT_GID} ${HOME} \
     # link the shared object libs provided by conda
     # && echo "${HOME}/miniforge3/lib" >> /etc/ld.so.conf.d/conda.conf \
     # && ldconfig \
     && unzip /usr/local/share/fonts/fonts.zip -d /usr/local/share/fonts \
     && rm /usr/local/share/fonts/fonts.zip \
     && fc-cache -f \
-    && mamba init \
+    && mkdir ${HOME}/quarto \
+    && chown -hR ${CT_UID}:${CT_GID} ${HOME}
+
+USER ${CT_USER}
+RUN mamba init \
     && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && echo 'eval "$(uv generate-shell-completion bash)"' >> ${HOME}/.bashrc
 
-USER ${CT_USER}
-RUN mkdir ${HOME}/quarto
 WORKDIR ${HOME}/quarto
 
 # Install Quarto extensions, filters because Rust refuses to install them with

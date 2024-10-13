@@ -47,23 +47,39 @@ container.
 Instantiate a container from the image:
 
 ```bash
-docker run -d --name <container_name> -v $(pwd):/home/docker/work -p 8888:8888 blueogive/scipython-docker:latest /bin/sleep infinity
+docker run -d --name <container_name> -v $(pwd):/home/docker/work -p 8888:8888 --restart unless-stopped blueogive/scipython-docker:latest /bin/sleep infinity
 ```
 
 replacing `<container_name>` with the name you wish to assign to your container.
 
 At this point, you will have a Bash shell with the `base` mamba/conda Python 
 virtual environment will be active. You can use the remote development 
-capabilities of VSCode to connect to the container and begin working. 
+capabilities of VSCode to connect to the container and begin working.
 
-Alternatively, you may wish to use Jupyter Lab or RStudio within the container.
-In that case you will need to complete some additional setup. Open a shell within the container:
+Alternatively, you may wish to use Jupyter Lab and/or RStudio within the
+container. In that case, you can use the `entrypoint` argument to have the
+container set up a starter environment:
+
+```bash
+docker run -d --name <container_name> -v $(pwd):/home/docker/work -p 8888:8888 --restart unless-stopped --entrypoint /usr/local/bin/start-jupyterlab.sh blueogive/scipython-docker:latest
+```
+
+As the container starts, it will require 2--3 minutes to build the environment.
+The process should end when the Jupyter Lab process starts and echoes a URL to
+the terminal. Open the URL in your browser to connect to the Jupyter Lab process
+in the container. You can start RStudio by clicking the launcher on the Jupyter
+Lab home screen.
+
+Alternatively, if your requirements are more exacting, you can complete some of
+the same steps taken by the `entrypoint` script manually and modify them to fit
+your needs. Open a shell within the container:
 
 ```bash
 docker exec -it <container_name> /bin/bash
 ```
 
-Create a new conda/mamber virtual environment that includes Jupyter (because the `base` virtual environment does not):
+Create a new conda/mamber virtual environment that includes Jupyter (because the
+`base` virtual environment does not):
 
 ```bash
 mamba env create -f ~/miniforge3/examples/conda-env-minimal.yml
