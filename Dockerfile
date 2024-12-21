@@ -10,18 +10,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20240904.1
+FROM ubuntu:noble-20241118.1
 
 USER root
 
-ENV RSTUDIO_VERSION=2024.09.0-375 \
-    QUARTO_VERSION=1.5.57 \
-    MAMBAFORGE_VERSION=24.7.1-2 \
+ENV RSTUDIO_VERSION=2024.12.0-467 \
+    QUARTO_VERSION=1.6.39 \
+    MAMBAFORGE_VERSION=24.11.0-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8"
-ENV RSTUDIO_URL="https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2024.09.0-375-amd64.deb" \
+ENV RSTUDIO_URL="https://download2.rstudio.org/server/jammy/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
   MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh" \
   QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb" \
   ORACLE_HOME=/opt/oracle/instantclient_23_5
@@ -50,7 +50,7 @@ RUN apt-get update --fix-missing \
         gfortran \
         default-jdk \
         dpkg \
-        pandoc \
+        # pandoc \
         # pandoc-citeproc \
         # Linux system packages that are dependencies of R packages
         libxml2-dev \
@@ -147,7 +147,8 @@ ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${ORACLE_HOME}/bin:$
 # Rename the default user and the associated homedir
     RUN usermod -l ${CT_USER} ubuntu \
     && groupmod -n ${CT_USER} ubuntu \
-    && usermod -d /home/${CT_USER} -m ${CT_USER}
+    && usermod -d /home/${CT_USER} -m ${CT_USER} \
+    && echo "${CT_USER}:${CT_USER}" | chpasswd
 
 # Add a script that we will use to correct permissions after running certain commands
 ADD fix-permissions /usr/local/bin/fix-permissions
@@ -240,14 +241,6 @@ RUN mamba init \
     && echo 'eval "$(uv generate-shell-completion bash)"' >> ${HOME}/.bashrc
 
 WORKDIR ${HOME}/quarto
-
-# Install Quarto extensions, filters because Rust refuses to install them with
-# self-signed TLS certificates in the chain.
-RUN quarto add --no-prompt quarto-ext/include-code-files \
-    && quarto install extension --no-prompt --quiet grantmcdermott/quarto-revealjs-clean \
-    && quarto install extension --no-prompt --quiet andrewheiss/hikmah-pdf \
-    && quarto install extension --no-prompt --quiet andrewheiss/hikmah-manuscript-docx \
-    && quarto install extension --no-prompt --quiet shafayetShafee/metropolis
 
 WORKDIR ${HOME}/R/utils
 RUN Rscript Rpkg_install.R

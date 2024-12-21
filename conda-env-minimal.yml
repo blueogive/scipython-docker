@@ -37,8 +37,9 @@ dependencies:
   - pip:
     - databricks-connect
     - databricks-sdk
+    - pip_system_certs
     - pre-commit
     - ptvsd
     - radian
     - ruff
-prefix: /home/docker/miniforge3/envs/minimal
+prefix: ${CONDA_PREFIX}/envs/minimal

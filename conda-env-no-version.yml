@@ -78,9 +78,9 @@ dependencies:
     - databricks-sdk
     - dbx
     - cx-Oracle
+    - pip_system_certs
     - pre-commit
     - ptvsd
-    - git+https://github.com/blueogive/pyncrypt.git@master
     - radian
     - ruff
-prefix: /home/docker/miniforge3/envs/example
+prefix: ${CONDA_PREFIX}/envs/example
