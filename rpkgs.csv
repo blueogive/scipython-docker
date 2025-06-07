@@ -1,6 +1,5 @@
 "Package"
 "devtools"
-"httpgd"
 "IRkernel"
 "jsonlite"
 "languageserver"

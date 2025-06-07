@@ -10,21 +10,22 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20241118.1
+FROM ubuntu:noble-20250529
 
 USER root
 
-ENV RSTUDIO_VERSION=2024.12.0-467 \
-    QUARTO_VERSION=1.6.39 \
-    MAMBAFORGE_VERSION=24.11.0-0 \
+ENV RSTUDIO_VERSION=2025.05.1-513 \
+    QUARTO_VERSION=1.7.31 \
+    # MAMBAFORGE_VERSION=24.11.0-0 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8"
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/jammy/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
-  MAMBAFORGE_URL="https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh" \
   QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb" \
-  ORACLE_HOME=/opt/oracle/instantclient_23_5
+  ORACLE_CLIENT_VERSION="23.8.0.25.04" \
+  ORACLE_CLIENT_FOLDER="2380000" \
+  ORACLE_HOME=/opt/oracle/instantclient_23_8
 ENV QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/${QUARTO_PKG}"
 
 RUN apt-get update --fix-missing \
@@ -50,8 +51,6 @@ RUN apt-get update --fix-missing \
         gfortran \
         default-jdk \
         dpkg \
-        # pandoc \
-        # pandoc-citeproc \
         # Linux system packages that are dependencies of R packages
         libxml2-dev \
         libcurl4-openssl-dev \
@@ -102,8 +101,8 @@ RUN apt-get update --fix-missing \
 RUN mkdir /opt/oracle
 WORKDIR /opt/oracle
 
-RUN curl -o instantclient-basiclite-linux.x64-23.5.0.24.07.zip https://download.oracle.com/otn_software/linux/instantclient/2350000/instantclient-basiclite-linux.x64-23.5.0.24.07.zip \
-    && curl -o instantclient-sqlplus-linux.x64-23.5.0.24.07.zip https://download.oracle.com/otn_software/linux/instantclient/2350000/instantclient-sqlplus-linux.x64-23.5.0.24.07.zip \
+RUN curl -o instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
+    && curl -o instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
     && unzip -oq 'instantclient-*.zip' \
     && rm instantclient-*.zip
 
@@ -150,9 +149,6 @@ ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${ORACLE_HOME}/bin:$
     && usermod -d /home/${CT_USER} -m ${CT_USER} \
     && echo "${CT_USER}:${CT_USER}" | chpasswd
 
-# Add a script that we will use to correct permissions after running certain commands
-ADD fix-permissions /usr/local/bin/fix-permissions
-
 ## Appending the option statement to the openssl config file
 ## ensures that opensslv3 is able to connect to hosts using older versions.
 RUN echo "Options = UnsafeLegacyRenegotiation" | tee -a ${OPENSSL_CONF}
@@ -186,16 +182,6 @@ COPY Rpkg_install.R ${HOME}/R/utils/Rpkg_install.R
 WORKDIR ${HOME}
 USER ${CT_USER}
 
-RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" \
-    && bash Miniforge3-$(uname)-$(uname -m).sh -b \
-    && rm Miniforge3-$(uname)-$(uname -m).sh
-
-
-RUN mkdir -p --mode ${CT_FMODE} ${HOME}/miniforge3/examples \
-    && mkdir -p --mode ${CT_FMODE} ${HOME}/.jupyter/lab
-COPY conda-env-no-version.yml ${HOME}/miniforge3/examples/conda-env.yml
-COPY conda-env-minimal.yml ${HOME}/miniforge3/examples/conda-env-minimal.yml
-
 ENV JUPYTERLAB_DIR=${HOME}/.jupyter/lab
 
 USER root
@@ -206,7 +192,7 @@ RUN wget -q $RSTUDIO_URL \
     && rm rstudio-server-*.deb
 
 COPY pip.conf .config/pip/pip.conf
-ENV PATH=${HOME}/miniforge3/bin:${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
+ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     RSESSION_PROXY_RSTUDIO_1_4=true \
     R_LIBS_USER=${HOME}/R/site-library
 
@@ -226,21 +212,21 @@ COPY start-singleuser.sh /usr/local/bin/
 COPY start-jupyterlab.sh /usr/local/bin/
 COPY fonts.zip /usr/local/share/fonts
 RUN chown -R ${CT_UID}:${CT_GID} ${HOME} \
-    # link the shared object libs provided by conda
-    # && echo "${HOME}/miniforge3/lib" >> /etc/ld.so.conf.d/conda.conf \
-    # && ldconfig \
     && unzip /usr/local/share/fonts/fonts.zip -d /usr/local/share/fonts \
     && rm /usr/local/share/fonts/fonts.zip \
     && fc-cache -f \
     && mkdir ${HOME}/quarto \
     && chown -hR ${CT_UID}:${CT_GID} ${HOME}
 
-USER ${CT_USER}
-RUN mamba init \
-    && curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && echo 'eval "$(uv generate-shell-completion bash)"' >> ${HOME}/.bashrc
+# Install nvm to enable runtime installation of Node.js, which is required by 
+# JupyterLab
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
+    && bash ${HOME}/.nvm/nvm.sh \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.nvm
 
-WORKDIR ${HOME}/quarto
+USER ${CT_USER}
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && echo 'eval "$(uv generate-shell-completion bash)"' >> ${HOME}/.bashrc
 
 WORKDIR ${HOME}/R/utils
 RUN Rscript Rpkg_install.R
@@ -251,9 +237,9 @@ ARG BUILD_DATE=${BUILD_DATE}
 
 # Add image metadata
 LABEL org.label-schema.license="https://opensource.org/licenses/MIT" \
-    org.label-schema.vendor="Conda-forge Community and Python Foundation, Dockerfile provided by Mark Coggeshall" \
+    org.label-schema.vendor="Dockerfile provided by Mark Coggeshall" \
     org.label-schema.name="Scientific Python Foundation" \
-    org.label-schema.description="Docker image including a foundational scientific Python stack based on Mambaforge and Python 3." \
+    org.label-schema.description="Docker image including a foundational scientific Python stack based on Python 3 and R." \
     org.label-schema.vcs-url=${VCS_URL} \
     org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE} \

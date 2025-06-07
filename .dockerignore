@@ -4,3 +4,6 @@ README.md
 .env
 ./devcontainer
 .pytest_cache
+.docker-iid.txt
+.gitignore
+.git/

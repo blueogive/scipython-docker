@@ -5,23 +5,11 @@ This repo contains a `Dockerfile` to build a foundational scientific Python
 a development environment in a context where installing a bespoke set of 
 required packages from the internet may be cumbersome or discouraged. Built 
 images are hosted on 
-[Docker Hub](https://hub.docker.com/blueogive/scipython-docker). The
-foundation of the image is the 
-[Mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
-environment management system developed by the Conda-Forge community. 
+[Docker Hub](https://hub.docker.com/blueogive/scipython-docker). 
 Core packages included in the image include:
-* CPython (3.12)
 
-Additional packages are included for:
-* Documentation (Sphinx)
-* Testing (pytest, coverage)
-* Linting (flake8, pylint)
-* Environment management (python-dotenv)
-* Database connectivity (sqlalchemy, pyodbc, pymssql)
 * Literate programming ([Quarto](https://quarto.org))
-
-In addition, it includes:
-* R (4.4.1);
+* R (4.5.0);
 * RStudio-Server;
 * [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy),
   so you can launch an RStudio session from within Jupyter Notebook/Lab,
@@ -82,26 +70,37 @@ Create a new conda/mamber virtual environment that includes Jupyter (because the
 `base` virtual environment does not):
 
 ```bash
-mamba env create -f ~/miniforge3/examples/conda-env-minimal.yml
+uv init --python 3.11 --name myproject
+```
+
+Install the Python packages you need, including Jupyter Lab:
+
+```bash
+uv add jupyterlab jupyter-rsession-proxy numpy pandas matplotlib scikit-learn scipy
+```
+Optionally, install package required for development:
+
+```bash
+uv add --dev ruff pytest pre-commit
 ```
 
 Activate the new virtual environment:
 
 ```bash
-mamba activate minimal
+source .venv/bin/activate
 ```
 
-If you want to use `R` within Jupyter, install the `R` kernel:
+Install Node.js (required for Jupyter Lab):
 
 ```bash
-Rscript -e "IRkernel::installspec()"
+bash ~/.nvm/nvm.sh && nvm install --lts
 ```
 
-Complete the post-install build of Jupyter Lab and start the service:
+If you want to use `R` within Jupyter, install the `R` kernel, complete the post-install
+build of Jupyter Lab, and start the service using provided script:
 
 ```bash
-jupyter lab build
-jupyter lab --no-browser --ip 0.0.0.0 --notebook-dir=~/work
+bash /usr/local/bin/start-jupyterlab.sh
 ```
 
 As Jupyter Lab starts, it will echo a bit of output to the console ending with statement similar to:

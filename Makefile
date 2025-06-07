@@ -2,7 +2,7 @@
 
 # To build an image with the latest package versions, change the value of
 # CONDA_ENV_FILE to  conda-env-no-version.yml
-CONDA_ENV_FILE := conda-env.yml
+# CONDA_ENV_FILE := conda-env.yml
 # CONDA_ENV_FILE := conda-env-no-version.yml
 VCS_URL := $(shell git remote get-url --push gh)
 VCS_REF := $(shell git rev-parse --short HEAD)
@@ -24,9 +24,15 @@ docker-check :
 docker-login:
 	@pass hub.docker.com/$(DOCKER_HUB_USER) | docker login -u $(DOCKER_HUB_USER) --password-stdin
 
+docker-debug:
+	@echo "Debugging Docker build with BuildKit enabled"
+	@./debug-build.sh
+
 docker-build: Dockerfile docker-login
 	@docker build \
-	--build-arg CONDA_ENV_FILE=$(CONDA_ENV_FILE) \
+	--progress=auto \
+	--debug \
+	--iidfile .docker-iid.txt \
 	--build-arg VCS_URL=$(VCS_URL) \
 	--build-arg VCS_REF=$(VCS_REF) \
 	--build-arg BUILD_DATE=$(BUILD_DATE) \
