@@ -10,13 +10,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20250529
+FROM ubuntu:noble-20250619
 
 USER root
 
 ENV RSTUDIO_VERSION=2025.05.1-513 \
-    QUARTO_VERSION=1.7.31 \
+    QUARTO_VERSION=1.7.32 \
     # MAMBAFORGE_VERSION=24.11.0-0 \
+    NVM_VERSION=0.40.3 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -218,13 +219,16 @@ RUN chown -R ${CT_UID}:${CT_GID} ${HOME} \
     && mkdir ${HOME}/quarto \
     && chown -hR ${CT_UID}:${CT_GID} ${HOME}
 
+USER ${CT_USER}
+
 # Install nvm to enable runtime installation of Node.js, which is required by 
 # JupyterLab
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
-    && bash ${HOME}/.nvm/nvm.sh \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash
+# To install Node.js, uncomment the following command before building the image.
+# This will install the latest LTS version of Node.js and set it as the default.
+# && bash -c ". ${HOME}/.nvm/nvm.sh && nvm install --lts && nvm use --lts && nvm alias default node && nvm cache clear"
 
-USER ${CT_USER}
+# Install uv, a tool for managing multiple versions of Python
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
     && echo 'eval "$(uv generate-shell-completion bash)"' >> ${HOME}/.bashrc
 

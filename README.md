@@ -66,8 +66,7 @@ your needs. Open a shell within the container:
 docker exec -it <container_name> /bin/bash
 ```
 
-Create a new conda/mamber virtual environment that includes Jupyter (because the
-`base` virtual environment does not):
+Create a new virtual environment that includes Jupyter:
 
 ```bash
 uv init --python 3.11 --name myproject
@@ -78,7 +77,8 @@ Install the Python packages you need, including Jupyter Lab:
 ```bash
 uv add jupyterlab jupyter-rsession-proxy numpy pandas matplotlib scikit-learn scipy
 ```
-Optionally, install package required for development:
+
+Optionally, install packages required for development:
 
 ```bash
 uv add --dev ruff pytest pre-commit
@@ -90,10 +90,17 @@ Activate the new virtual environment:
 source .venv/bin/activate
 ```
 
-Install Node.js (required for Jupyter Lab):
+Verify that Node.js is installed (required for Jupyter Lab):
 
 ```bash
-bash ~/.nvm/nvm.sh && nvm install --lts
+node --version
+# This should return a version number, e.g., v18.16.0.
+```
+
+If not, install it:
+
+```bash
+bash ~/.nvm/nvm.sh && nvm install --lts && nvm use --lts && nvm alias default node && nvm cache clear
 ```
 
 If you want to use `R` within Jupyter, install the `R` kernel, complete the post-install
