@@ -10,12 +10,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20250619
+FROM ubuntu:noble-20251001
 
 USER root
 
-ENV RSTUDIO_VERSION=2025.05.1-513 \
-    QUARTO_VERSION=1.7.32 \
+ENV RSTUDIO_VERSION=2025.09.1-401 \
+    QUARTO_VERSION=1.8.25 \
     # MAMBAFORGE_VERSION=24.11.0-0 \
     NVM_VERSION=0.40.3 \
     DEBIAN_FRONTEND=noninteractive \
@@ -226,7 +226,7 @@ USER ${CT_USER}
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash
 # To install Node.js, uncomment the following command before building the image.
 # This will install the latest LTS version of Node.js and set it as the default.
-# && bash -c ". ${HOME}/.nvm/nvm.sh && nvm install --lts && nvm use --lts && nvm alias default node && nvm cache clear"
+RUN bash -c ". ${HOME}/.nvm/nvm.sh && nvm install --lts && nvm use --lts && nvm alias default node && nvm cache clear"
 
 # Install uv, a tool for managing multiple versions of Python
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
