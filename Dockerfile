@@ -10,14 +10,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20251001
+FROM ubuntu:noble-20260410
 
 USER root
 
-ENV RSTUDIO_VERSION=2025.09.1-401 \
-    QUARTO_VERSION=1.8.25 \
+ENV RSTUDIO_VERSION=2026.04.0-526 \
+    QUARTO_VERSION=1.9.37 \
     # MAMBAFORGE_VERSION=24.11.0-0 \
-    NVM_VERSION=0.40.3 \
+    NVM_VERSION=0.40.4 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -99,22 +99,22 @@ RUN apt-get update --fix-missing \
     && rm ${QUARTO_PKG}
 
 ## Install Oracle Instant Client, tools
-RUN mkdir /opt/oracle
-WORKDIR /opt/oracle
+# RUN mkdir /opt/oracle
+# WORKDIR /opt/oracle
 
-RUN curl -o instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
-    && curl -o instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
-    && unzip -oq 'instantclient-*.zip' \
-    && rm instantclient-*.zip
+# RUN curl -o instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
+#     && curl -o instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
+#     && unzip -oq 'instantclient-*.zip' \
+#     && rm instantclient-*.zip
 
-WORKDIR ${ORACLE_HOME}
-RUN mkdir bin \
-    && mv sqlplus bin \
-    && mkdir -p sqlplus/admin \
-    && mv glogin.sql sqlplus/admin \
-    && echo ${ORACLE_HOME} > \
-        /etc/ld.so.conf.d/oracle-instantclient.conf \
-    && ldconfig
+# WORKDIR ${ORACLE_HOME}
+# RUN mkdir bin \
+#     && mv sqlplus bin \
+#     && mkdir -p sqlplus/admin \
+#     && mv glogin.sql sqlplus/admin \
+#     && echo ${ORACLE_HOME} > \
+#         /etc/ld.so.conf.d/oracle-instantclient.conf \
+#     && ldconfig
 
 ## Install Microsoft and Postgres ODBC drivers and SQL commandline tools
 RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
@@ -134,7 +134,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ## Set environment variables
-ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${ORACLE_HOME}/bin:${PATH} \
+# ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${ORACLE_HOME}/bin:${PATH} \
+ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${PATH} \
     NLS_LANG=AMERICAN_AMERICA.UTF8 \
     SHELL=/bin/bash \
     CT_USER=docker \
