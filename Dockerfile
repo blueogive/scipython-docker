@@ -10,14 +10,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20260410
+FROM ubuntu:noble-20260509.1
 
 USER root
 
-ENV RSTUDIO_VERSION=2026.04.0-526 \
-    QUARTO_VERSION=1.9.37 \
+ENV RSTUDIO_VERSION=2026.05.1-225 \
+    QUARTO_VERSION=1.9.38 \
     # MAMBAFORGE_VERSION=24.11.0-0 \
     NVM_VERSION=0.40.4 \
+    RIPGREP_VERSION=15.1.0 \
+    FZF_VERSION=0.73.1 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -220,6 +222,13 @@ RUN chown -R ${CT_UID}:${CT_GID} ${HOME} \
     && mkdir ${HOME}/quarto \
     && chown -hR ${CT_UID}:${CT_GID} ${HOME}
 
+# Install ripgrep
+# ripgrep, a modern replacement for pgrep
+RUN curl -fL --retry 5 --retry-delay 2 -o /tmp/ripgrep.deb \
+    "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep_${RIPGREP_VERSION}-1_amd64.deb" && \
+    sudo dpkg -i /tmp/ripgrep.deb && \
+    rm -f /tmp/ripgrep.deb  
+
 USER ${CT_USER}
 
 # Install nvm to enable runtime installation of Node.js, which is required by 
@@ -235,6 +244,29 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
 
 WORKDIR ${HOME}/R/utils
 RUN Rscript Rpkg_install.R
+
+# Install non-standard utilities.
+# Micro text editor to ~/.config/micro
+RUN mkdir -p ${HOME}/.config/micro && \
+    curl https://getmic.ro | bash && \
+    mv micro ${HOME}/.config/micro && \
+    # eza, a modern replacement for ls
+    mkdir -p ${HOME}/.config/eza && \
+    wget -qc https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz -O - | tar xz -C ${HOME}/.config/eza && \
+    # fzf, a command-line fuzzy finder
+    mkdir -p ${HOME}/.config/fzf && \
+    curl -fL --retry 5 --retry-delay 2 \
+    -o /tmp/fzf.tar.gz \
+    "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" && \
+    tar -xzf /tmp/fzf.tar.gz -C "${HOME}/.config/fzf" && \
+    rm -f /tmp/fzf.tar.gz && \
+    # zoxide, a modern replacement for cd an soft link the installed utilities to ~/.local/bin
+    curl -sS https://webinstall.dev/zoxide | bash && \
+    # Soft link the installed utilities to ~/.local/bin
+    mkdir -p ${HOME}/.local/bin && \
+    ln -s ${HOME}/.config/micro/micro ${HOME}/.local/bin && \
+    ln -s ${HOME}/.config/eza/eza ${HOME}/.local/bin && \
+    ln -s ${HOME}/.config/fzf/fzf ${HOME}/.local/bin
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
