@@ -167,6 +167,7 @@ WORKDIR ${HOME}
 # Use rig to install a system-wide R.
 RUN curl -LsSf https://r-lib.github.io/rig/install.sh | sh \
     && $HOME/.local/bin/rig add release \
+    && $HOME/.local/bin/rig cache clean \
     && mkdir -p ${HOME}/R/utils
 
 COPY rpkgs.csv ${HOME}/R/utils/rpkgs.csv
