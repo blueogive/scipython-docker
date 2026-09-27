@@ -9,13 +9,11 @@ images are hosted on
 Core packages included in the image include:
 
 * Literate programming ([Quarto](https://quarto.org))
-* R (4.5.0);
+* R (4.6.1);
 * RStudio-Server;
-* [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy),
-  so you can launch an RStudio session from within Jupyter Notebook/Lab,
-  and a collection of R packages centered around the 
-  [tidyverse](https://tidyverse.org), and literate programming;
-
+* `uv` for Python venv management;
+* `rig` for R version management;
+* `npm` and `node` for JavaScript runtime and package management.
 
 ## Usage
 
@@ -128,6 +126,14 @@ This container includes `gopass`, a Git/GPG-backed CLI secrets manager. Users sh
 To use `gopass`:
 
 ```bash
+# Initialize a GPG key and password store for gopass
+gopass init --crypto gpg
+```
+
+Or, if you already have a GPG key, you can initialize the password store without specifying a new GPG key.
+
+```bash
+# Initialize a password store for gopass without specifying a GPG key
 gopass init
 ```
 
@@ -142,19 +148,19 @@ gopass insert myservice/myusername/mysecret
 To retrieve a secret:
 
 ```bash
-gopass show myservice/myusername/mysecret
+gopass show -o myservice/myusername/mysecret
 ```
 
-Alternatively, you can inject secrets into environment variables by using the `gopass export` command. For example:
+Alternatively, you can inject secrets into environment variables. For example:
 
 ```bash
-eval $(gopass export myservice/myusername/mysecret)
+eval $(gopass show -o myservice/myusername/mysecret)
 ```
 
 or
 
 ```bash
-export MYSECRET=$(gopass export myservice/myusername/mysecret)
+export MYSECRET=$(gopass show -o myservice/myusername/mysecret)
 ```
 
 For more information on using `gopass`, refer to the official documentation: [https://www.gopass.pw](https://www.gopass.pw).

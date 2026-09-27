@@ -211,9 +211,9 @@ ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     R_LIBS_USER=${HOME}/R/site-library
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cargo \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.rustup
+# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
+#     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cargo \
+#     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.rustup
 # RUN chown -R ${CT_UID}:${CT_GID} ${HOME}/R
 
 # jupyter port
