@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20260901
+FROM ubuntu:noble
 
 USER root
 
@@ -165,24 +165,30 @@ ENV HOME=/home/${CT_USER}
 
 WORKDIR ${HOME}
 
-RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu noble-cran40/" > \
-    /etc/apt/sources.list.d/cran40.list \
-    && apt-key adv --keyserver keyserver.ubuntu.com \
-        --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        r-base \
-        r-base-dev \
-    && apt-get clean \
-    && mkdir -p /usr/local/lib/R/etc/ \
-    && mkdir -p --mode ${CT_FMODE} ${HOME}/R/utils \
-    && mkdir -p --mode ${CT_FMODE} ${HOME}/R/site-library \
-    && echo "R_LIBS_SITE=${R_LIBS_SITE-'${HOME}/R/site-library:/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
-        >> ${HOME}/.Renviron \
-    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.Renviron \
-    && echo \
-        "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" \
-        >> /usr/local/lib/R/etc/Rprofile.site 
+# Add CRAN repository for R and install R base packages
+# RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu noble-cran40/" > \
+#     /etc/apt/sources.list.d/cran40.list \
+#     && apt-key adv --keyserver keyserver.ubuntu.com \
+#         --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+#     && apt-get update \
+#     && apt-get install -y --no-install-recommends \
+#         r-base \
+#         r-base-dev \
+#     && apt-get clean \
+#     && mkdir -p /usr/local/lib/R/etc/ \
+#     && mkdir -p --mode ${CT_FMODE} ${HOME}/R/utils \
+#     && mkdir -p --mode ${CT_FMODE} ${HOME}/R/site-library \
+#     && echo "R_LIBS_SITE=${R_LIBS_SITE-'${HOME}/R/site-library:/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" \
+#         >> ${HOME}/.Renviron \
+#     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.Renviron \
+#     && echo \
+#         "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" \
+#         >> /usr/local/lib/R/etc/Rprofile.site 
+
+# Use rig to install a system-wide R.
+RUN curl -LsSf https://r-lib.github.io/rig/install.sh | sh \
+    && $HOME/.local/bin/rig add release \
+    && mkdir -p ${HOME}/R/utils
 
 COPY rpkgs.csv ${HOME}/R/utils/rpkgs.csv
 COPY Rpkg_install.R ${HOME}/R/utils/Rpkg_install.R
@@ -205,10 +211,10 @@ ENV PATH=${HOME}/.local/bin:${HOME}/.TinyTeX/bin/x86_64-linux:${PATH} \
     R_LIBS_USER=${HOME}/R/site-library
 
 # Install Rust
-# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
-#     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cargo \
-#     && chown -R ${CT_UID}:${CT_GID} ${HOME}/.rustup \
-RUN chown -R ${CT_UID}:${CT_GID} ${HOME}/R
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.cargo \
+    && chown -R ${CT_UID}:${CT_GID} ${HOME}/.rustup
+# RUN chown -R ${CT_UID}:${CT_GID} ${HOME}/R
 
 # jupyter port
 EXPOSE 8888
@@ -244,22 +250,22 @@ RUN curl -fL --retry 5 --retry-delay 2 -o /tmp/gopass.deb \
 
 USER ${CT_USER}
 
-RUN mkdir -p ${HOME}/.config/gopass \
-    && gopass completion bash | sudo tee /etc/bash_completion.d/gopass >/dev/null
+RUN mkdir -p ${HOME}/.config/gopass ${HOME}/.bash_completion.d \
+    && gopass completion bash > ${HOME}/.bash_completion.d/gopass \
+    && echo '[ -f ~/.bash_completion.d/gopass ] && source ~/.bash_completion.d/gopass' >> ${HOME}/.bashrc
 
 # Install nvm to enable runtime installation of Node.js, which is required by 
 # JupyterLab
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash
 # To install Node.js, uncomment the following command before building the image.
 # This will install the latest LTS version of Node.js and set it as the default.
-RUN bash -c ". ${HOME}/.nvm/nvm.sh && nvm install --lts && nvm use --lts && nvm alias default node && nvm cache clear"
+# npm ships bundled with each Node release, so it lags the latest npm release;
+# upgrade it explicitly after selecting the Node version.
+RUN bash -c ". ${HOME}/.nvm/nvm.sh && nvm install --lts && nvm use --lts && nvm alias default node && npm install -g npm@latest && nvm cache clear"
 
 # Install uv, a tool for managing multiple versions of Python
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
     && echo 'eval "$(uv generate-shell-completion bash)"' >> ${HOME}/.bashrc
-
-WORKDIR ${HOME}/R/utils
-RUN Rscript Rpkg_install.R
 
 # Install non-standard utilities.
 # Micro text editor to ~/.config/micro
@@ -283,6 +289,10 @@ RUN mkdir -p ${HOME}/.config/micro && \
     ln -s ${HOME}/.config/micro/micro ${HOME}/.local/bin && \
     ln -s ${HOME}/.config/eza/eza ${HOME}/.local/bin && \
     ln -s ${HOME}/.config/fzf/fzf ${HOME}/.local/bin
+
+COPY .bashrc ${HOME}/.bashrc-eza
+RUN cat ${HOME}/.bashrc-eza >> ${HOME}/.bashrc \
+    && rm -f ${HOME}/.bashrc-eza
 
 ARG VCS_URL=${VCS_URL}
 ARG VCS_REF=${VCS_REF}
