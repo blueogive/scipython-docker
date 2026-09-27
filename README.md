@@ -121,4 +121,42 @@ your instance. On your host, open your preferred browser and point it to
 `http://localhost:8888/?token=<token_value>` to connect to the Jupyter Lab
 instance.
 
+## Secrets Management
+
+This container includes `gopass`, a Git/GPG-backed CLI secrets manager. Users should run `gopass init` at container runtime to create or import their own GPG key and password store. The secrets are not baked into the image, ensuring they remain private to the user.
+
+To use `gopass`:
+
+```bash
+gopass init
+```
+
+Follow the prompts to set up your GPG key and password store. Once initialized, you can add, retrieve, and manage secrets securely within the container.
+
+For example, to add a new secret:
+
+```bash
+gopass insert myservice/myusername/mysecret
+```
+
+To retrieve a secret:
+
+```bash
+gopass show myservice/myusername/mysecret
+```
+
+Alternatively, you can inject secrets into environment variables by using the `gopass export` command. For example:
+
+```bash
+eval $(gopass export myservice/myusername/mysecret)
+```
+
+or
+
+```bash
+export MYSECRET=$(gopass export myservice/myusername/mysecret)
+```
+
+For more information on using `gopass`, refer to the official documentation: [https://www.gopass.pw](https://www.gopass.pw).
+
 Contributions are welcome.

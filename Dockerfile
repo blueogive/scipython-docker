@@ -20,6 +20,7 @@ ENV RSTUDIO_VERSION=2026.05.1-225 \
     NVM_VERSION=0.40.4 \
     RIPGREP_VERSION=15.1.0 \
     FZF_VERSION=0.73.1 \
+    GOPASS_VERSION=1.17.3 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
@@ -229,7 +230,19 @@ RUN curl -fL --retry 5 --retry-delay 2 -o /tmp/ripgrep.deb \
     sudo dpkg -i /tmp/ripgrep.deb && \
     rm -f /tmp/ripgrep.deb  
 
+# Install gopass, a Git/GPG-backed CLI secrets manager (git and gnupg2 are
+# already installed above); users run `gopass init` at container runtime to
+# create/import their own GPG key and password store, which is not baked
+# into the image.
+RUN curl -fL --retry 5 --retry-delay 2 -o /tmp/gopass.deb \
+    "https://github.com/gopasspw/gopass/releases/download/v${GOPASS_VERSION}/gopass_${GOPASS_VERSION}_linux_amd64.deb" && \
+    dpkg -i /tmp/gopass.deb && \
+    rm -f /tmp/gopass.deb
+
 USER ${CT_USER}
+
+RUN mkdir -p ${HOME}/.config/gopass \
+    && gopass completion bash | sudo tee /etc/bash_completion.d/gopass >/dev/null
 
 # Install nvm to enable runtime installation of Node.js, which is required by 
 # JupyterLab
