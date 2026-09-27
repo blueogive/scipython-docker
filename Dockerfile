@@ -10,26 +10,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-FROM ubuntu:noble-20260509.1
+FROM ubuntu:noble-20260901
 
 USER root
 
-ENV RSTUDIO_VERSION=2026.05.1-225 \
-    QUARTO_VERSION=1.9.38 \
+ENV RSTUDIO_VERSION=2026.09.0-174 \
+    QUARTO_VERSION=1.10.18 \
     # MAMBAFORGE_VERSION=24.11.0-0 \
     NVM_VERSION=0.40.4 \
-    RIPGREP_VERSION=15.1.0 \
-    FZF_VERSION=0.73.1 \
+    RIPGREP_VERSION=15.2.0 \
+    FZF_VERSION=0.74.4 \
     GOPASS_VERSION=1.17.3 \
     DEBIAN_FRONTEND=noninteractive \
     LC_ALL="en_US.UTF-8" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8"
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/jammy/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
-  QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb" \
-  ORACLE_CLIENT_VERSION="23.8.0.25.04" \
-  ORACLE_CLIENT_FOLDER="2380000" \
-  ORACLE_HOME=/opt/oracle/instantclient_23_8
+  QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb"
+#   ORACLE_CLIENT_VERSION="23.8.0.25.04" \
+#   ORACLE_CLIENT_FOLDER="2380000" \
+#   ORACLE_HOME=/opt/oracle/instantclient_23_8
 ENV QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/${QUARTO_PKG}"
 
 RUN apt-get update --fix-missing \
@@ -39,7 +39,6 @@ RUN apt-get update --fix-missing \
         ca-certificates \
         curl \
         gdebi-core \
-        git \
         gnupg2 \
         libapparmor1 \
         libclang-dev \
@@ -49,6 +48,7 @@ RUN apt-get update --fix-missing \
         make \
         openssh-client \
         psmisc \
+        software-properties-common \
         sudo \
         wget \
         build-essential \
@@ -92,6 +92,9 @@ RUN apt-get update --fix-missing \
         unixodbc-dev \
         # required by Oracle Instant Client
         # libaio1
+    && add-apt-repository ppa:git-core/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && locale-gen ${LANG} \
