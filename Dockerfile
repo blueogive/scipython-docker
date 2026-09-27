@@ -27,9 +27,6 @@ ENV RSTUDIO_VERSION=2026.09.0-174 \
     LANGUAGE="en_US.UTF-8"
 ENV RSTUDIO_URL="https://download2.rstudio.org/server/jammy/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
   QUARTO_PKG="quarto-${QUARTO_VERSION}-linux-amd64.deb"
-#   ORACLE_CLIENT_VERSION="23.8.0.25.04" \
-#   ORACLE_CLIENT_FOLDER="2380000" \
-#   ORACLE_HOME=/opt/oracle/instantclient_23_8
 ENV QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/${QUARTO_PKG}"
 
 RUN apt-get update --fix-missing \
@@ -104,24 +101,6 @@ RUN apt-get update --fix-missing \
     && dpkg -i ${QUARTO_PKG} \
     && rm ${QUARTO_PKG}
 
-## Install Oracle Instant Client, tools
-# RUN mkdir /opt/oracle
-# WORKDIR /opt/oracle
-
-# RUN curl -o instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-basiclite-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
-#     && curl -o instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_FOLDER}/instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}.zip \
-#     && unzip -oq 'instantclient-*.zip' \
-#     && rm instantclient-*.zip
-
-# WORKDIR ${ORACLE_HOME}
-# RUN mkdir bin \
-#     && mv sqlplus bin \
-#     && mkdir -p sqlplus/admin \
-#     && mv glogin.sql sqlplus/admin \
-#     && echo ${ORACLE_HOME} > \
-#         /etc/ld.so.conf.d/oracle-instantclient.conf \
-#     && ldconfig
-
 ## Install Microsoft and Postgres ODBC drivers and SQL commandline tools
 RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
     | gpg --dearmor -o /usr/share/keyrings/packages.microsoft.gpg \
@@ -152,7 +131,7 @@ ENV PATH=/opt/mssql-tools18/bin:/usr/lib/rstudio-server/bin:${PATH} \
     OPENSSL_CONF=/etc/ssl/openssl.cnf
 
 # Rename the default user and the associated homedir
-    RUN usermod -l ${CT_USER} ubuntu \
+RUN usermod -l ${CT_USER} ubuntu \
     && groupmod -n ${CT_USER} ubuntu \
     && usermod -d /home/${CT_USER} -m ${CT_USER} \
     && echo "${CT_USER}:${CT_USER}" | chpasswd
